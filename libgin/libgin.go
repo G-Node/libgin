@@ -1,5 +1,8 @@
 /*
-Package libgin provides functionality for features added for the G-Node GIN service.
-This is a temporary package. Functions and types have been copied from gin-doi and gin-dex services. The plan is for G-Node/GOGS (GIN) to not depend on any code from the added services. Instead, common functionality will be imported from a separate lib package. This subpackage is the first version of that.
+Package libgin provides functionality shared between the G-Node GIN services.
+These include:
+- GIN Web: The G-Node/GOGS fork (https://github.com/G-Node/gogs)
+- GIN DOI: The DOI registration service (https://github.com/G-Node/gin-doi)
+- GIN DEX: The indexing service for GIN (https://github.com/G-Node/gin-dex)
 */
 package libgin
