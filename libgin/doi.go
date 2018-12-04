@@ -72,6 +72,12 @@ func (a *Author) RenderAuthor() string {
 	return strings.TrimRight(auth, ";")
 }
 
+type NamedIdentifier struct {
+	URI    string
+	Scheme string
+	ID     string
+}
+
 type Reference struct {
 	Reftype string
 	Name    string
