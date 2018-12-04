@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 
 	log "gopkg.in/clog.v1"
 )
@@ -51,6 +53,23 @@ type Author struct {
 	LastName    string
 	Affiliation string
 	ID          string
+}
+
+func (c *Author) GetValidID() *NamedIdentifier {
+	if c.ID == "" {
+		return nil
+	}
+	if strings.Contains(strings.ToLower(c.ID), "orcid") {
+		// assume the orcid id is a four block number thing eg. 0000-0002-5947-9939
+		var re = regexp.MustCompile(`(\d+-\d+-\d+-\d+)`)
+		nid := string(re.Find([]byte(c.ID)))
+		return &NamedIdentifier{URI: "https://orcid.org/", Scheme: "ORCID", ID: nid}
+	}
+	return nil
+}
+func (a *Author) RenderAuthor() string {
+	auth := fmt.Sprintf("%s,%s;%s;%s", a.LastName, a.FirstName, a.Affiliation, a.ID)
+	return strings.TrimRight(auth, ";")
 }
 
 type Reference struct {
