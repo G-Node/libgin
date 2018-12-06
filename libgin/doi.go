@@ -1,14 +1,17 @@
 package libgin
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/xml"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
-	log "gopkg.in/clog.v1"
+	log "github.com/Sirupsen/logrus"
 )
 
 // NOTE: TEMPORARY COPIES FROM gin-doi
@@ -46,6 +49,35 @@ type DOIRegInfo struct {
 	Funding     []string
 	License     *License
 	DType       string
+}
+
+func (c *DOIRegInfo) GetType() string {
+	if c.DType != "" {
+		return c.DType
+	}
+	return "Dataset"
+}
+
+func (c *DOIRegInfo) GetCitation() string {
+	var authors string
+	for _, auth := range c.Authors {
+		if len(auth.FirstName) > 0 {
+			authors += fmt.Sprintf("%s %s, ", auth.LastName, string(auth.FirstName[0]))
+		} else {
+			authors += fmt.Sprintf("%s, ", auth.LastName)
+		}
+	}
+	return fmt.Sprintf("%s (%d) %s. G-Node. doi:%s", authors, time.Now().Year(), c.Title, c.DOI)
+}
+
+func (c *DOIRegInfo) EscXML(txt string) string {
+	buf := new(bytes.Buffer)
+	if err := xml.EscapeText(buf, []byte(txt)); err != nil {
+		log.Errorf("Could not escape:%s, %+v", txt, err)
+		return ""
+	}
+	return buf.String()
+
 }
 
 type Author struct {
@@ -93,7 +125,7 @@ func IsRegisteredDOI(doi string) bool {
 	url := fmt.Sprintf("https://doi.org/%s", doi)
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Trace("Could not query for doi: %s at %s", doi, url)
+		log.Errorf("Could not query for doi: %s at %s", doi, url)
 		return false
 	}
 	if resp.StatusCode != http.StatusNotFound {
