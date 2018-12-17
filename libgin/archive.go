@@ -9,8 +9,9 @@ import (
 	"strings"
 )
 
-// MakeZip creates a zip archive called dest from the files specified by source.
+// MakeZip creates a zip archive using the dest io.Writer from the files specified by source.
 // Any directories listed in source are archived recursively.
+// Empty directories are ignored.
 func MakeZip(dest io.Writer, source ...string) error {
 	// check sources
 	for _, src := range source {
