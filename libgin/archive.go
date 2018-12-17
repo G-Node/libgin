@@ -23,7 +23,7 @@ func MakeZip(dest io.Writer, source ...string) error {
 	zipwriter := zip.NewWriter(dest)
 	defer zipwriter.Close()
 
-	walker := func(filepath string, fi os.FileInfo, err error) error {
+	walker := func(path string, fi os.FileInfo, err error) error {
 
 		// return on any error
 		if err != nil {
@@ -38,7 +38,7 @@ func MakeZip(dest io.Writer, source ...string) error {
 
 		// update the name to correctly reflect the desired destination when unzipping
 		// header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
-		header.Name = filepath
+		header.Name = path
 
 		if fi.Mode().IsDir() {
 			return nil
@@ -52,7 +52,7 @@ func MakeZip(dest io.Writer, source ...string) error {
 
 		// Dereference symlinks
 		if fi.Mode()&os.ModeSymlink != 0 {
-			data, err := os.Readlink(filepath)
+			data, err := os.Readlink(path)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func MakeZip(dest io.Writer, source ...string) error {
 		}
 
 		// open files for zipping
-		f, err := os.Open(filepath)
+		f, err := os.Open(path)
 		defer f.Close()
 		if err != nil {
 			return err
