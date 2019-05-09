@@ -20,6 +20,7 @@ func ReadConfDefault(key, defval string) string {
 func ReadConf(key string) string {
 	value, ok := os.LookupEnv(key)
 	if !ok {
+		// Exiting in a library function is weird and bad, but let's keep it FOR NOW
 		os.Exit(-1)
 	}
 	return value
