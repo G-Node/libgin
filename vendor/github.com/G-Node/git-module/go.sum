@@ -1,15 +1,10 @@
 github.com/G-Node/gig v0.0.0-20171025133355-6d784b40b534 h1:ZdsP0JR5T1lDcsXSeARuI83++uHNoSZiN6kaMgf1EPM=
 github.com/G-Node/gig v0.0.0-20171025133355-6d784b40b534/go.mod h1:H+82VbQUp9AzlbEiZl3bri3mlPlN2q6CxlIh0CyJWnc=
-github.com/G-Node/git-module v0.8.4-0.20191218161021-3fd4d7aaf932 h1:dZrf6z91eDajQqj8vdmOkKXZtCc3NGpkBikXwZGOZYM=
-github.com/G-Node/git-module v0.8.4-0.20191218161021-3fd4d7aaf932/go.mod h1:VYqGwMiaOacy+pch//bmTW0HnfVxZA6VnFSvzOOwpX0=
+github.com/G-Node/libgin v0.0.0-20191216094436-47f8aadc0067 h1:JXz3L3qJZiS0sHilcJFTyfx/e/6d3INXibDFArGytZQ=
 github.com/G-Node/libgin v0.0.0-20191216094436-47f8aadc0067/go.mod h1:2yLXQnNbwjH8mslxnzU8Kb+d7c2Zqo8DIgR6Pgp7lCg=
-github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/docker/docker v1.13.1 h1:IkZjBSIc8hBjLpqeAbeE5mca5mNgeatLHBy3GO78BWo=
 github.com/docker/docker v1.13.1/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
-github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 h1:EGx4pi6eqNxGaHF6qqu48+N2wcFQ5qg5FXgOdqsJ5d8=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
-github.com/jtolds/gls v4.20.0+incompatible h1:xdiiI2gbIgH/gLH7ADydsJ1uDOEzR8yvV7C0MuV77Wo=
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
 github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2 h1:YocNLcTBdEdvY3iDK6jfWXvEaM5OCKkjxPKoJRdB3Gg=
 github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2/go.mod h1:76rfSfYPWj01Z85hUf/ituArm797mNKcvINh1OlsZKo=
