@@ -75,6 +75,14 @@ func ginarchive(path string) error {
 
 	for fname, annexkey := range annexContent {
 		fmt.Printf("%q -> %q\n", fname, annexkey)
+		loc, err := git.NewCommand("annex", "contentlocation", annexkey).RunInDir(path)
+		loc = strings.TrimRight(loc, "\n")
+		if err != nil {
+			fmt.Printf("ERROR: couldn't find content for file %q (%s)\n", fname, annexkey)
+			continue
+		}
+
+		fmt.Printf("%q will be replaced with %q\n", fname, loc)
 	}
 
 	// 3. Update git archive with annexed content
