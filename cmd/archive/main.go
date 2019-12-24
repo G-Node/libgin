@@ -7,11 +7,16 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gogs/git-module"
 )
 
-func readAnnexedStubs(archivepath string) ([]string, error) {
+const (
+	annexident = "/annex/objects"
+)
+
+func readAnnexedStubs(archivepath string) (map[string]string, error) {
 	archiverc, err := zip.OpenReader(archivepath)
 	if err != nil {
 		return nil, err
@@ -19,6 +24,7 @@ func readAnnexedStubs(archivepath string) ([]string, error) {
 
 	defer archiverc.Close()
 
+	annexContentMap := make(map[string]string)
 	for _, file := range archiverc.File {
 		info := file.FileInfo()
 		if info.IsDir() {
@@ -28,20 +34,18 @@ func readAnnexedStubs(archivepath string) ([]string, error) {
 		// if it's a file (or a symlink), read the contents and check if it's
 		// an annexed object path
 		filerc, _ := file.Open()
-		data := make([]byte, info.Size())
-		n, err := io.ReadFull(filerc, data)
-		if err != nil {
-			fmt.Printf("  Error reading link %q: %s\n", info.Name(), err.Error())
-			continue
+		data := make([]byte, 1024)
+		n, _ := io.ReadFull(filerc, data)
+		data = data[:n]
+		if strings.Contains(string(data), annexident) {
+			_, key := filepath.Split(string(data))
+			// git content of unlocked pointer files have newline at the end so
+			// we should trim space
+			key = strings.TrimSpace(key) // trim newlines and spaces
+			annexContentMap[file.Name] = key
 		}
-		fmt.Printf("  Read %d bytes\n", n)
-		if n < 1024 {
-			fmt.Println(string(data))
-		}
-
-		// or if it contains the 'annex/objects' prefix
 	}
-	return []string{}, nil
+	return annexContentMap, nil
 }
 
 func ginarchive(path string) error {
@@ -64,13 +68,13 @@ func ginarchive(path string) error {
 	}
 
 	// 2. Identify annexed files
-	stubs, err := readAnnexedStubs(archivepath)
+	annexContent, err := readAnnexedStubs(archivepath)
 	if err != nil {
 		return err
 	}
 
-	for _, fname := range stubs {
-		fmt.Println(fname)
+	for fname, annexkey := range annexContent {
+		fmt.Printf("%q -> %q\n", fname, annexkey)
 	}
 
 	// 3. Update git archive with annexed content
