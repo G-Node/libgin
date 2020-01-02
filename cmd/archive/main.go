@@ -205,33 +205,69 @@ func ginarchiveTwoStep(path string) error {
 	return err
 }
 
-func zipTree(zipWriter *zip.Writer, t *git.Tree, prefix string) {
+func addBlob(zipWriter *zip.Writer, blob *git.Blob, fname string, repopath string) {
+	var filemode os.FileMode
+	filemode |= 0660
+	if blob.IsLink() {
+		filemode |= os.ModeSymlink
+	}
+	header := zip.FileHeader{
+		Name:     filepath.Join(fname),
+		Modified: time.Now(), // TODO: use commit time
+	}
+
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+	blob.DataPipeline(stdout, stderr)
+	reader := bufio.NewReader(stdout)
+	readbuf := make([]byte, 10240)
+	// check first 32 bytes for annex path identifier
+	n, err := reader.Read(readbuf)
+	if strings.Contains(string(readbuf[:32]), annexident) {
+		// replace with annexed data
+		_, annexkey := filepath.Split(string(readbuf[:n]))
+		annexkey = strings.TrimSpace(annexkey) // trim newlines and spaces
+		loc, err := git.NewCommand("annex", "contentlocation", annexkey).RunInDir(repopath)
+		if err != nil {
+			fmt.Printf("ERROR: couldn't find content file %q\n", annexkey)
+			return
+		}
+		loc = strings.TrimRight(loc, "\n")
+		loc = filepath.Join(repopath, loc)
+		fmt.Printf("Replacing %q with %q\n", fname, loc)
+		rc, err := os.Open(loc)
+		if err != nil {
+			fmt.Printf("Failed to read: %s\n", err.Error())
+			return
+		}
+		// copy mode from content file
+		rcInfo, _ := rc.Stat()
+		filemode = rcInfo.Mode()
+		n, err = reader.Read(readbuf)
+		reader = bufio.NewReader(rc)
+	}
+	header.SetMode(filemode)
+	writer, _ := zipWriter.CreateHeader(&header)
+	for ; n > 0 || err == nil; n, err = reader.Read(readbuf) {
+		if err != nil {
+			fmt.Printf("ERROR reading %s\n", fname)
+			break
+		}
+		writer.Write(readbuf[:n])
+	}
+}
+
+func zipTree(zipWriter *zip.Writer, t *git.Tree, prefix string, repopath string) {
 	entries, _ := t.ListEntries()
 	for _, te := range entries {
 		fname := filepath.Join(prefix, te.Name())
 		fmt.Println(fname)
 		if te.IsDir() {
 			subtree, _ := t.SubTree(te.Name())
-			zipTree(zipWriter, subtree, fname)
+			zipTree(zipWriter, subtree, fname, repopath)
 		} else {
 			blob := te.Blob()
-			header := zip.FileHeader{
-				Name:     filepath.Join(prefix, te.Name()), // TODO: prepend path
-				Modified: time.Now(),                       // TODO: use commit time
-				// TODO: set file mode
-			}
-			stdout := new(bytes.Buffer)
-			stderr := new(bytes.Buffer)
-			writer, _ := zipWriter.CreateHeader(&header)
-			blob.DataPipeline(stdout, stderr)
-			readbuf := make([]byte, 10240)
-			for n, err := stdout.Read(readbuf); n > 0 || err == nil; n, err = stdout.Read(readbuf) {
-				if err != nil {
-					fmt.Printf("ERROR reading %s\n", te.Name())
-					break
-				}
-				writer.Write(readbuf[:n])
-			}
+			addBlob(zipWriter, blob, fname, repopath)
 		}
 	}
 }
@@ -262,7 +298,7 @@ func ginarchive(path string) error {
 	defer zipfile.Close()
 	defer zipWriter.Close()
 
-	zipTree(zipWriter, tree, "")
+	zipTree(zipWriter, tree, "", path)
 
 	return nil
 }
