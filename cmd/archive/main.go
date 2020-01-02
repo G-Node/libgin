@@ -181,7 +181,8 @@ func ginarchive(path string) error {
 
 	// 1. Create git archive
 	fname := master.ID.String()[:6] + ".zip"
-	archivepath := filepath.Join("/home", "achilleas", "tmp", fname)
+	// place archive in repository's parent directory
+	archivepath, _ := filepath.Abs(filepath.Join(path, "..", fname))
 	fmt.Printf("Archiving repository at %s to %s\n", path, archivepath)
 	if err := master.CreateArchive(archivepath, git.ZIP); err != nil {
 		return err
