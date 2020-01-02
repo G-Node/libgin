@@ -39,7 +39,7 @@ func readAnnexedStubs(archivepath string) (map[string]string, error) {
 		data := make([]byte, 1024)
 		n, _ := io.ReadFull(filerc, data)
 		data = data[:n]
-		if strings.Contains(string(data), annexident) {
+		if strings.Contains(string(data[:32]), annexident) { // don't check whole contents for annex string
 			_, key := filepath.Split(string(data))
 			// git content of unlocked pointer files have newline at the end so
 			// we should trim space
