@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gogs/git-module"
 )
@@ -168,7 +170,7 @@ func replaceStubs(archivepath string, repopath string, annexContent map[string]s
 	return nil
 }
 
-func ginarchive(path string) error {
+func ginarchiveTwoStep(path string) error {
 	repo, err := git.OpenRepository(path)
 	if err != nil {
 		return err
@@ -201,6 +203,68 @@ func ginarchive(path string) error {
 	}
 
 	return err
+}
+
+func zipTree(zipWriter *zip.Writer, t *git.Tree, prefix string) {
+	entries, _ := t.ListEntries()
+	for _, te := range entries {
+		fname := filepath.Join(prefix, te.Name())
+		fmt.Println(fname)
+		if te.IsDir() {
+			subtree, _ := t.SubTree(te.Name())
+			zipTree(zipWriter, subtree, fname)
+		} else {
+			blob := te.Blob()
+			header := zip.FileHeader{
+				Name:     filepath.Join(prefix, te.Name()), // TODO: prepend path
+				Modified: time.Now(),                       // TODO: use commit time
+				// TODO: set file mode
+			}
+			stdout := new(bytes.Buffer)
+			stderr := new(bytes.Buffer)
+			writer, _ := zipWriter.CreateHeader(&header)
+			blob.DataPipeline(stdout, stderr)
+			readbuf := make([]byte, 10240)
+			for n, err := stdout.Read(readbuf); n > 0 || err == nil; n, err = stdout.Read(readbuf) {
+				if err != nil {
+					fmt.Printf("ERROR reading %s\n", te.Name())
+					break
+				}
+				writer.Write(readbuf[:n])
+			}
+		}
+	}
+}
+
+func ginarchive(path string) error {
+	repo, err := git.OpenRepository(path)
+	if err != nil {
+		return err
+	}
+
+	master, err := repo.GetCommit("master")
+	if err != nil {
+		return err
+	}
+
+	// 1. Create git archive
+	fname := master.ID.String()[:6] + ".zip"
+	// place archive in repository's parent directory
+	archivepath, _ := filepath.Abs(filepath.Join(path, "..", fname))
+	fmt.Printf("Archiving repository at %s to %s\n", path, archivepath)
+
+	// walk tree and zip files
+	tree := &master.Tree
+
+	zipfile, _ := os.Create(archivepath)
+	zipWriter := zip.NewWriter(zipfile)
+
+	defer zipfile.Close()
+	defer zipWriter.Close()
+
+	zipTree(zipWriter, tree, "")
+
+	return nil
 }
 
 func isDirectory(path string) bool {
