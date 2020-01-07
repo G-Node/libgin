@@ -2,7 +2,6 @@ package gig
 
 import (
 	"testing"
-	"github.com/docker/docker/pkg/testutil/assert"
 )
 
 func TestWalkRef(t *testing.T) {
@@ -17,10 +16,11 @@ func TestWalkRef(t *testing.T) {
 		t.Errorf("Could not walk master repository:%v", err)
 		return
 	}
-	t.Log("Got commits:%v", commits)
+	t.Logf("Got commits: %v", commits)
 	id_sha, _ := ParseSHA1("f8306602c14ab6f49dae674513b6f6a7748e6f09")
-	assert.NotNil(t, commits[id_sha])
-
+	if commits[id_sha] == nil {
+		t.Fatalf("Expected non-nil value")
+	}
 }
 
 func TestGetBlobs(t *testing.T) {
@@ -35,7 +35,9 @@ func TestGetBlobs(t *testing.T) {
 	}
 	blobs := make(map[SHA1]*Blob)
 	rep.GetBlobsForCommit(com.(*Commit), blobs)
-	t.Log("Got Blobs:%v", blobs)
+	t.Logf("Got Blobs: %v", blobs)
 	id_blob, _ := ParseSHA1("02e020cdf53288638ab42fd1529556aeccd3e873")
-	assert.NotNil(t, blobs[id_blob])
+	if blobs[id_blob] == nil {
+		t.Fatalf("Expected non-nil value")
+	}
 }
