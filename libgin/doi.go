@@ -119,9 +119,10 @@ type NamedIdentifier struct {
 }
 
 type Reference struct {
-	Reftype string
-	Name    string
-	ID      string
+	Reftype  string
+	Name     string
+	Citation string
+	ID       string
 }
 
 type License struct {
