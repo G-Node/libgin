@@ -48,7 +48,8 @@ type DOIRegInfo struct {
 	Missing      []string
 	DOI          string
 	UUID         string
-	FileSize     int64
+	FileName     string
+	FileSize     string
 	Title        string
 	Authors      []Author
 	Description  string
@@ -57,6 +58,7 @@ type DOIRegInfo struct {
 	Funding      []string
 	License      *License
 	ResourceType string
+	DateTime     time.Time
 }
 
 func (c *DOIRegInfo) GetType() string {
@@ -75,17 +77,24 @@ func (c *DOIRegInfo) GetCitation() string {
 			authors += fmt.Sprintf("%s, ", auth.LastName)
 		}
 	}
-	return fmt.Sprintf("%s (%d) %s. G-Node. doi:%s", authors, time.Now().Year(), c.Title, c.DOI)
+	return fmt.Sprintf("%s (%s) %s. G-Node. doi:%s", authors, c.Year(), c.Title, c.DOI)
 }
 
 func (c *DOIRegInfo) EscXML(txt string) string {
 	buf := new(bytes.Buffer)
 	if err := xml.EscapeText(buf, []byte(txt)); err != nil {
-		log.Printf("Could not escape: %s :: %s", txt, err.Error())
+		log.Printf("Could not escape: %q :: %s", txt, err.Error())
 		return ""
 	}
 	return buf.String()
+}
 
+func (c *DOIRegInfo) Year() string {
+	return fmt.Sprintf("%d", c.DateTime.Year())
+}
+
+func (c *DOIRegInfo) ISODate() string {
+	return c.DateTime.Format("2006-01-02")
 }
 
 type Author struct {
