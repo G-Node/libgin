@@ -1,10 +1,8 @@
 package libgin
 
 import (
-	"bytes"
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/xml"
 	"fmt"
 	"log"
 	"net/http"
@@ -82,15 +80,6 @@ func (c *DOIRegInfo) GetCitation() string {
 		}
 	}
 	return fmt.Sprintf("%s (%s) %s. G-Node. doi:%s", authors, c.Year(), c.Title, c.DOI)
-}
-
-func (c *DOIRegInfo) EscXML(txt string) string {
-	buf := new(bytes.Buffer)
-	if err := xml.EscapeText(buf, []byte(txt)); err != nil {
-		log.Printf("Could not escape: %q :: %s", txt, err.Error())
-		return ""
-	}
-	return buf.String()
 }
 
 func (c *DOIRegInfo) Year() string {
