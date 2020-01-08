@@ -48,20 +48,21 @@ type DOIRequestData struct {
 
 // DOIRegInfo holds all the metadata and information necessary for a DOI registration request.
 type DOIRegInfo struct {
-	Missing      []string
-	DOI          string
-	UUID         string
-	FileName     string
-	FileSize     string
-	Title        string
-	Authors      []Author
-	Description  string
-	Keywords     []string
-	References   []Reference
-	Funding      []string
-	License      *License
-	ResourceType string
-	DateTime     time.Time
+	Missing         []string
+	DOI             string
+	UUID            string
+	FileName        string
+	FileSize        string
+	Title           string
+	Authors         []Author
+	Description     string
+	Keywords        []string
+	References      []Reference
+	Funding         []string
+	License         *License
+	ResourceType    string
+	DateTime        time.Time
+	TemplateVersion string
 }
 
 func (c *DOIRegInfo) GetType() string {
