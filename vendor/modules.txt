@@ -1,8 +1,4 @@
 # github.com/G-Node/git-module v0.8.4-gnode
 github.com/G-Node/git-module
-# github.com/davecgh/go-spew v1.1.1
-github.com/davecgh/go-spew/spew
-# github.com/docker/docker v1.13.1
-github.com/docker/docker/pkg/testutil/assert
 # github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 github.com/mcuadros/go-version
