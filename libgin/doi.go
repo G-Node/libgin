@@ -15,9 +15,12 @@ import (
 
 // NOTE: TEMPORARY COPIES FROM gin-doi
 
-// uuidMap is a map between registered repositories and their UUIDs for datasets registered before the new UUID generation method was implemented.
-// This map is required because the current method of computing UUIDs differs from the older method and this lookup is used to handle the old-method UUIDs.
-var uuidMap = map[string]string{
+// UUIDMap is a map between registered repositories and their UUIDs for
+// datasets registered before the new UUID generation method was implemented.
+// This map is required because the current method of computing UUIDs differs
+// from the older method and this lookup is used to handle the old-method
+// UUIDs.
+var UUIDMap = map[string]string{
 	"INT/multielectrode_grasp":                   "f83565d148510fede8a277f660e1a419",
 	"ajkumaraswamy/HB-PAC_disinhibitory_network": "1090f803258557299d287c4d44a541b2",
 	"steffi/Kleineidam_et_al_2017":               "f53069de4c4921a3cfa8f17d55ef98bb",
@@ -27,7 +30,7 @@ var uuidMap = map[string]string{
 
 // RepoPathToUUID computes a UUID from a repository path.
 func RepoPathToUUID(URI string) string {
-	if doi, ok := uuidMap[URI]; ok {
+	if doi, ok := UUIDMap[URI]; ok {
 		return doi
 	}
 	currMd5 := md5.Sum([]byte(URI))
