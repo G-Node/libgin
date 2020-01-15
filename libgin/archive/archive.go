@@ -13,6 +13,9 @@ import (
 // the dest io.Writer in ZIP format.  Any directories listed in source are
 // archived recursively.  Empty directories are ignored.
 func MakeZip(dest io.Writer, source ...string) error {
+	// NOTE: Old function that clones and zips repositories.
+	//       Does not support commits other than master
+
 	// check sources
 	for _, src := range source {
 		if _, err := os.Stat(src); err != nil {
