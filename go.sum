@@ -1,7 +1,7 @@
 github.com/G-Node/gig v0.0.0-20171025133355-6d784b40b534/go.mod h1:H+82VbQUp9AzlbEiZl3bri3mlPlN2q6CxlIh0CyJWnc=
 github.com/G-Node/git-module v0.8.4-0.20191218161021-3fd4d7aaf932/go.mod h1:VYqGwMiaOacy+pch//bmTW0HnfVxZA6VnFSvzOOwpX0=
-github.com/G-Node/git-module v0.8.4-gnode h1:BNtyp/2J+zisHObMqrxazJ2fb2ASPu30uN8sNfliSgI=
-github.com/G-Node/git-module v0.8.4-gnode/go.mod h1:TdKR+8dChXtB7Hw3xS4Bfn5QQenPnihuoWx/vnSnb1k=
+github.com/G-Node/git-module v0.8.4-gnode4 h1:5V/0qMjrrKHwZI4LxM3346vjkw52189UprlUVLfnKgY=
+github.com/G-Node/git-module v0.8.4-gnode4/go.mod h1:TdKR+8dChXtB7Hw3xS4Bfn5QQenPnihuoWx/vnSnb1k=
 github.com/G-Node/libgin v0.0.0-20191216094436-47f8aadc0067/go.mod h1:2yLXQnNbwjH8mslxnzU8Kb+d7c2Zqo8DIgR6Pgp7lCg=
 github.com/G-Node/libgin v0.3.0/go.mod h1:VjulCBq7k/kgf4Eabk2f4w9SDNowWhLnK+yZvy5Nppk=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
