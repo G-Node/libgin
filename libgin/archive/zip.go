@@ -14,17 +14,17 @@ import (
 	"github.com/gogs/git-module"
 )
 
-type ZipArchive struct {
+type ZipWriter struct {
 	Repository *git.Repository
 	Commit     *git.Commit
 	writer     *zip.Writer
 }
 
-func NewZipArchive(repo *git.Repository, commit *git.Commit) *ZipArchive {
-	return &ZipArchive{Repository: repo, Commit: commit}
+func NewZipWriter(repo *git.Repository, commit *git.Commit) *ZipWriter {
+	return &ZipWriter{Repository: repo, Commit: commit}
 }
 
-func (a *ZipArchive) Write(target string) error {
+func (a *ZipWriter) Write(target string) error {
 	tree := &a.Commit.Tree
 
 	zipfile, err := os.Create(target)
@@ -41,7 +41,7 @@ func (a *ZipArchive) Write(target string) error {
 	return nil
 }
 
-func (a *ZipArchive) addBlob(blob *git.Blob, fname string) {
+func (a *ZipWriter) addBlob(blob *git.Blob, fname string) {
 	var filemode os.FileMode
 	filemode |= 0660
 	if blob.IsLink() {
@@ -88,7 +88,7 @@ func (a *ZipArchive) addBlob(blob *git.Blob, fname string) {
 	}
 }
 
-func (a *ZipArchive) addTree(tree *git.Tree, path string) {
+func (a *ZipWriter) addTree(tree *git.Tree, path string) {
 	entries, _ := tree.ListEntries()
 	for _, te := range entries {
 		path := filepath.Join(path, te.Name())

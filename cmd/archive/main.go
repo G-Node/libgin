@@ -64,9 +64,9 @@ func main() {
 	var writer archive.Writer
 	switch archivetype {
 	case "tar":
-		writer = archive.NewTarArchive(repo, master)
+		writer = archive.NewTarWriter(repo, master)
 	case "zip":
-		writer = archive.NewZipArchive(repo, master)
+		writer = archive.NewZipWriter(repo, master)
 	default:
 		fmt.Printf("Invalid type %q. Specify either \"tar\" or \"zip\"", archivetype)
 		os.Exit(1)

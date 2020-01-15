@@ -15,17 +15,17 @@ import (
 	"github.com/gogs/git-module"
 )
 
-type TarArchive struct {
+type TarWriter struct {
 	Repository *git.Repository
 	Commit     *git.Commit
 	writer     *tar.Writer
 }
 
-func NewTarArchive(repo *git.Repository, commit *git.Commit) *TarArchive {
-	return &TarArchive{Repository: repo, Commit: commit}
+func NewTarWriter(repo *git.Repository, commit *git.Commit) *TarWriter {
+	return &TarWriter{Repository: repo, Commit: commit}
 }
 
-func (a *TarArchive) Write(target string) error {
+func (a *TarWriter) Write(target string) error {
 	tree := &a.Commit.Tree
 
 	gzipfile, err := os.Create(target)
@@ -44,7 +44,7 @@ func (a *TarArchive) Write(target string) error {
 	return nil
 }
 
-func (a *TarArchive) addBlob(blob *git.Blob, fname string) {
+func (a *TarWriter) addBlob(blob *git.Blob, fname string) {
 	var filemode os.FileMode
 	filemode |= 0660
 	if blob.IsLink() {
@@ -94,7 +94,7 @@ func (a *TarArchive) addBlob(blob *git.Blob, fname string) {
 	}
 }
 
-func (a *TarArchive) addTree(tree *git.Tree, path string) {
+func (a *TarWriter) addTree(tree *git.Tree, path string) {
 	entries, _ := tree.ListEntries()
 	for _, te := range entries {
 		path := filepath.Join(path, te.Name())
