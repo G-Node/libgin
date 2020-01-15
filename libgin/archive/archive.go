@@ -1,4 +1,4 @@
-package libgin
+package archive
 
 import (
 	"archive/zip"
