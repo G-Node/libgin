@@ -2,9 +2,9 @@ package annex
 
 import "github.com/G-Node/git-module"
 
-func isAnnexed(dir string) (bool, error) {
-	return false, nil
-}
+const (
+	IdentStr = "/annex/objects"
+)
 
 func Upgrade(dir string) (string, error) {
 	cmd := git.NewACommand("upgrade")
