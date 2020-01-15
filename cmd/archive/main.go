@@ -1,19 +1,11 @@
 package main
 
 import (
-	"archive/tar"
-	"archive/zip"
-	"bufio"
-	"bytes"
-	"compress/gzip"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
+	"github.com/G-Node/libgin/libgin/archive"
 	"github.com/gogs/git-module"
 )
 
@@ -38,12 +30,15 @@ func isRepository(path string) bool {
 
 func main() {
 	args := os.Args
-	if len(args) != 2 {
-		fmt.Printf("Usage: %s <repository location>\n", args[0])
+	if len(args) != 3 {
+		fmt.Printf("Usage: %s <type> <repository location>\n", args[0])
+		fmt.Println("  <type> \"tar\" or \"zip\"")
 		os.Exit(1)
 	}
 
-	path := args[1]
+	archivetype := args[1]
+	path := args[2]
+
 	if !isDirectory(path) {
 		fmt.Printf("%s does not appear to be a directory\n", path)
 		os.Exit(1)
@@ -54,15 +49,28 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := ginArchiveZip(path)
+	repo, err := git.OpenRepository(path)
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Printf("ERROR: %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	err = ginArchiveTar(path)
+	master, err := repo.GetCommit("master")
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Printf("ERROR: %s\n", err.Error())
 		os.Exit(1)
 	}
+
+	var writer archive.Writer
+	switch archivetype {
+	case "tar":
+		writer = archive.NewTarArchive(repo, master)
+	case "zip":
+		writer = archive.NewZipArchive(repo, master)
+	default:
+		fmt.Printf("Invalid type %q. Specify either \"tar\" or \"zip\"", archivetype)
+		os.Exit(1)
+	}
+
+	writer.Write(path)
 }

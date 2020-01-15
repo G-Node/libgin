@@ -7,7 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gogs/git-module"
 )
+
+type Writer interface {
+	Write(target string) error
+	addTree(tree *git.Tree, path string)
+	addBlob(blob *git.Blob, path string)
+}
 
 // MakeZip recursively writes all the files found under the provided sources to
 // the dest io.Writer in ZIP format.  Any directories listed in source are
