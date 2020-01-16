@@ -36,12 +36,10 @@ func (a *ZipWriter) Write(target string) error {
 	a.writer = zip.NewWriter(zipfile)
 	defer a.writer.Close()
 
-	a.addTree(tree, "")
-
-	return nil
+	return a.addTree(tree, "")
 }
 
-func (a *ZipWriter) addBlob(blob *git.Blob, fname string) {
+func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 	var filemode os.FileMode
 	filemode |= 0660
 	if blob.IsLink() {
@@ -65,15 +63,13 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) {
 		annexkey = strings.TrimSpace(annexkey) // trim newlines and spaces
 		loc, err := git.NewCommand("annex", "contentlocation", annexkey).RunInDir(a.Repository.Path)
 		if err != nil {
-			fmt.Printf("ERROR: couldn't find content file %q\n", annexkey)
-			return
+			return fmt.Errorf("content file not found: %q\n", annexkey)
 		}
 		loc = strings.TrimRight(loc, "\n")
 		loc = filepath.Join(a.Repository.Path, loc)
 		rc, err := os.Open(loc)
 		if err != nil {
-			fmt.Printf("Failed to read: %s\n", err.Error())
-			return
+			return fmt.Errorf("failed to open content file: %s\n", err.Error())
 		}
 		// copy mode from content file
 		rcInfo, _ := rc.Stat()
@@ -86,18 +82,24 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) {
 	for ; n > 0 || err == nil; n, err = reader.Read(readbuf) {
 		writer.Write(readbuf[:n])
 	}
+	return nil
 }
 
-func (a *ZipWriter) addTree(tree *git.Tree, path string) {
+func (a *ZipWriter) addTree(tree *git.Tree, path string) error {
 	entries, _ := tree.ListEntries()
 	for _, te := range entries {
 		path := filepath.Join(path, te.Name())
 		if te.IsDir() {
 			subtree, _ := tree.SubTree(te.Name())
-			a.addTree(subtree, path)
+			if err := a.addTree(subtree, path); err != nil {
+				return err
+			}
 		} else {
 			blob := te.Blob()
-			a.addBlob(blob, path)
+			if err := a.addBlob(blob, path); err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }

@@ -13,8 +13,8 @@ import (
 
 type Writer interface {
 	Write(target string) error
-	addTree(tree *git.Tree, path string)
-	addBlob(blob *git.Blob, path string)
+	addTree(tree *git.Tree, path string) error
+	addBlob(blob *git.Blob, path string) error
 }
 
 // MakeZip recursively writes all the files found under the provided sources to
