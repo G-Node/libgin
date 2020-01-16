@@ -85,11 +85,12 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 	return nil
 }
 
-func (a *ZipWriter) addTree(tree *git.Tree, path string) error {
+func (a *ZipWriter) addTree(tree *git.Tree, parent string) error {
 	entries, _ := tree.ListEntries()
 	for _, te := range entries {
-		path := filepath.Join(path, te.Name())
+		path := filepath.Join(parent, te.Name())
 		if te.IsDir() {
+			a.writer.Create(path + "/")
 			subtree, _ := tree.SubTree(te.Name())
 			if err := a.addTree(subtree, path); err != nil {
 				return err
