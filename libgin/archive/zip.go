@@ -46,7 +46,7 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 		filemode |= os.ModeSymlink
 	}
 	header := zip.FileHeader{
-		Name:     filepath.Join(fname),
+		Name:     fname,
 		Modified: time.Now(), // TODO: use commit time
 	}
 
