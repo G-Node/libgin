@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,21 +40,20 @@ func (a *TarWriter) Write(target string) error {
 	a.writer = tar.NewWriter(gzipWriter)
 	defer a.writer.Close()
 
-	a.addTree(tree, "")
-
-	return nil
+	return a.addTree(tree, "")
 }
 
 func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
+	header := tar.Header{
+		Name:    fname,
+		ModTime: time.Now(), // TODO: use commit time
+	}
 	var filemode os.FileMode
 	filemode |= 0660
 	if blob.IsLink() {
 		filemode |= os.ModeSymlink
 	}
-	header := tar.Header{
-		Name:    filepath.Join(fname),
-		ModTime: time.Now(), // TODO: use commit time
-	}
+	blob.Blob()
 
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
@@ -61,9 +61,8 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 	size := blob.Size()
 	reader := bufio.NewReader(stdout)
 	readbuf := make([]byte, 10240)
-	// check first 32 bytes for annex path identifier
-	n, err := reader.Read(readbuf)
 	if annex.IsAnnexFile(blob) {
+		n, err := reader.Read(readbuf)
 		// replace with annexed data
 		_, annexkey := filepath.Split(string(readbuf[:n]))
 		annexkey = strings.TrimSpace(annexkey) // trim newlines and spaces
@@ -80,15 +79,27 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 		// copy mode from content file
 		rcInfo, _ := rc.Stat()
 		filemode = rcInfo.Mode()
-		n, err = reader.Read(readbuf)
 		reader = bufio.NewReader(rc)
 		size = rcInfo.Size()
 	}
 	header.Mode = int64(filemode)
+	if filemode|os.ModeSymlink == filemode {
+		header.Typeflag = tar.TypeSymlink
+		linkname, err := ioutil.ReadAll(reader)
+		if err != nil {
+			return err
+		}
+		header.Linkname = string(linkname)
+		return a.writer.WriteHeader(&header)
+	}
 	header.Size = size
-	a.writer.WriteHeader(&header)
-	for ; n > 0 || err == nil; n, err = reader.Read(readbuf) {
-		a.writer.Write(readbuf[:n])
+	if err := a.writer.WriteHeader(&header); err != nil {
+		return err
+	}
+	for n, err := reader.Read(readbuf); n > 0 || err == nil; n, err = reader.Read(readbuf) {
+		if _, err := a.writer.Write(readbuf[:n]); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -98,6 +109,15 @@ func (a *TarWriter) addTree(tree *git.Tree, path string) error {
 	for _, te := range entries {
 		path := filepath.Join(path, te.Name())
 		if te.IsDir() {
+			header := tar.Header{
+				Name:     path + "/",
+				ModTime:  time.Now(), // TODO: use commit time
+				Typeflag: tar.TypeDir,
+				Mode:     0770,
+			}
+			if err := a.writer.WriteHeader(&header); err != nil {
+				return err
+			}
 			subtree, _ := tree.SubTree(te.Name())
 			if err := a.addTree(subtree, path); err != nil {
 				return err
