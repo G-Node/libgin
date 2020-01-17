@@ -1,15 +1,47 @@
 package archive
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 
 	"github.com/gogs/git-module"
 )
+
+func unzip(fname string, dest string) error {
+	zr, err := zip.OpenReader(fname)
+	if err != nil {
+		return err
+	}
+	defer zr.Close()
+	os.MkdirAll(dest, 0777)
+	for _, file := range zr.File {
+		if file.FileInfo().IsDir() {
+			os.Mkdir(filepath.Join(dest, file.Name), 0777)
+			continue
+		}
+
+		fr, err := file.Open()
+		if err != nil {
+			return fmt.Errorf("failed to open zipped file %q for reading: %s", file.Name, err.Error())
+		}
+		fw, err := os.Create(filepath.Join(dest, file.Name))
+		if err != nil {
+			return fmt.Errorf("failed to create file %q during extraction: %s", file.Name, err.Error())
+		}
+		_, err = io.Copy(fw, fr)
+		if err != nil {
+			return fmt.Errorf("failed to extract file %q: %s", file.Name, err.Error())
+		}
+		fr.Close()
+		fw.Close()
+	}
+	return nil
+}
 
 // extractTestRepo extracts the zip archive used for testing.
 // Returns the git.Repository.
@@ -21,9 +53,7 @@ func extractTestRepo() (*git.Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := exec.Command("unzip", "-d", temprepo, zipfilepath).Run(); err != nil {
-		return nil, err
-	}
+	unzip(zipfilepath, temprepo)
 
 	return git.OpenRepository(temprepo)
 }
