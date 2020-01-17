@@ -55,9 +55,8 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 	blob.DataPipeline(stdout, stderr)
 	reader := bufio.NewReader(stdout)
 	readbuf := make([]byte, 10240)
-	// check first 32 bytes for annex path identifier
-	n, err := reader.Read(readbuf)
-	if strings.Contains(string(readbuf[:32]), annex.IdentStr) {
+	if annex.IsAnnexFile(blob) {
+		n, err := reader.Read(readbuf)
 		// replace with annexed data
 		_, annexkey := filepath.Split(string(readbuf[:n]))
 		annexkey = strings.TrimSpace(annexkey) // trim newlines and spaces
@@ -74,12 +73,12 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 		// copy mode from content file
 		rcInfo, _ := rc.Stat()
 		filemode = rcInfo.Mode()
-		n, err = reader.Read(readbuf)
+		// set reader to read from annexed content file
 		reader = bufio.NewReader(rc)
 	}
 	header.SetMode(filemode)
 	writer, _ := a.writer.CreateHeader(&header)
-	for ; n > 0 || err == nil; n, err = reader.Read(readbuf) {
+	for n, err := reader.Read(readbuf); n > 0 || err == nil; n, err = reader.Read(readbuf) {
 		writer.Write(readbuf[:n])
 	}
 	return nil

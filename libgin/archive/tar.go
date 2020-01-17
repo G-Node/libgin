@@ -63,7 +63,7 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 	readbuf := make([]byte, 10240)
 	// check first 32 bytes for annex path identifier
 	n, err := reader.Read(readbuf)
-	if strings.Contains(string(readbuf[:32]), annex.IdentStr) {
+	if annex.IsAnnexFile(blob) {
 		// replace with annexed data
 		_, annexkey := filepath.Split(string(readbuf[:n]))
 		annexkey = strings.TrimSpace(annexkey) // trim newlines and spaces
