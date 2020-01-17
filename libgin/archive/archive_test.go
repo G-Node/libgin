@@ -2,6 +2,8 @@ package archive
 
 import (
 	"archive/zip"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -52,6 +54,49 @@ func unzip(fname string, dest string) error {
 	return nil
 }
 
+func checkfiles(root string) error {
+	// expected hashes and link targets for test repository
+	hashes := map[string]string{
+		"script": "fe8a3874c606877d6731f676b443d2ac",
+		"README": "cca1920d0bee2a1d391d50227aefd3f2",
+		"deep/nested/directories/with/annex/file/data.dat":     "ef38b7920bff83cd052ae05fc75da404",
+		"deep/nested/directories/with/annex/file/unlocked.dat": "520d4ed11f2d101c3e9ea2df9f439b28",
+		"unlocked-binary-file":                                 "2bb965fdecf8e2750a5b9fb87a79bf2d",
+		"links/data.lnk":                                       "../deep/nested/directories/with/annex/file/data.dat",
+		"links/readme.lnk":                                     "../README",
+	}
+
+	walkfn := func(curpath string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		relpath, _ := filepath.Rel(root, curpath)
+
+		expHash, ok := hashes[relpath]
+		if !ok {
+			return fmt.Errorf("unexpected file found: %s", relpath)
+		}
+
+		linfo, _ := os.Lstat(curpath)
+		if linfo.Mode()|os.ModeSymlink == linfo.Mode() {
+			target, _ := os.Readlink(curpath)
+			if target != expHash {
+				return fmt.Errorf("symlink check failed for %q: expected %q found %q", relpath, expHash, target)
+			}
+			return nil
+		}
+		fp, _ := os.Open(curpath)
+		data, _ := ioutil.ReadAll(fp)
+		actsum := md5.Sum(data)
+		actualHash := hex.EncodeToString(actsum[:16])
+		if expHash != actualHash {
+			return fmt.Errorf("hash mismatch for %q: expected %q found %q", relpath, expHash, actualHash)
+		}
+		return nil
+	}
+	return filepath.Walk(root, walkfn)
+}
+
 // extractTestRepo extracts the zip archive used for testing.
 // Returns the git.Repository.
 // Uses external (system) unzip command.
@@ -62,7 +107,9 @@ func extractTestRepo() (*git.Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	unzip(zipfilepath, temprepo)
+	if err := unzip(zipfilepath, temprepo); err != nil {
+		return nil, err
+	}
 
 	return git.OpenRepository(temprepo)
 }
@@ -75,12 +122,6 @@ func TestZip(t *testing.T) {
 
 	defer os.RemoveAll(repo.Path)
 
-	fmt.Println("repository at", repo.Path)
-	branches, _ := repo.GetBranches()
-	for _, branch := range branches {
-		fmt.Println(branch)
-	}
-
 	master, err := repo.GetCommit("master")
 	if err != nil {
 		t.Fatalf("failed to get master branch: %s", err.Error())
@@ -90,8 +131,7 @@ func TestZip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed creating directory for zip file: %s", err.Error())
 	}
-
-	// defer os.RemoveAll(zippath)
+	defer os.RemoveAll(zippath)
 
 	zipfile := filepath.Join(zippath, "repo.zip")
 	writer := NewZipWriter(repo, master)
@@ -99,8 +139,16 @@ func TestZip(t *testing.T) {
 		t.Fatalf("error creating zip file: %s", err.Error())
 	}
 
-	fmt.Println("Zip file created")
-	fmt.Println(zippath)
+	// unzip and check files
+	expath := filepath.Join(zippath, "extracted")
+	if err := unzip(zipfile, expath); err != nil {
+		t.Fatalf("failed to extract created archive: %s", err.Error())
+	}
+
+	if err := checkfiles(expath); err != nil {
+		t.Fatalf("file check failed: %s", err.Error())
+	}
+
 }
 
 func TestTar(t *testing.T) {
