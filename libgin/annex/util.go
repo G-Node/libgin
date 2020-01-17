@@ -44,6 +44,6 @@ func IsAnnexFile(blob *git.Blob) bool {
 }
 
 func Upgrade(dir string) (string, error) {
-	cmd := git.NewACommand("upgrade")
+	cmd := git.NewCommand("annex", "upgrade")
 	return cmd.RunInDir(dir)
 }
