@@ -29,6 +29,15 @@ func unzip(fname string, dest string) error {
 		if err != nil {
 			return fmt.Errorf("failed to open zipped file %q for reading: %s", file.Name, err.Error())
 		}
+		if file.Mode()|os.ModeSymlink == file.Mode() {
+			// create link
+			data, _ := ioutil.ReadAll(fr)
+			if err := os.Symlink(string(data), filepath.Join(dest, file.Name)); err != nil {
+				return err
+			}
+			continue
+		}
+
 		fw, err := os.Create(filepath.Join(dest, file.Name))
 		if err != nil {
 			return fmt.Errorf("failed to create file %q during extraction: %s", file.Name, err.Error())
