@@ -79,7 +79,9 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 	header.SetMode(filemode)
 	writer, _ := a.writer.CreateHeader(&header)
 	for n, err := reader.Read(readbuf); n > 0 || err == nil; n, err = reader.Read(readbuf) {
-		writer.Write(readbuf[:n])
+		if _, err := writer.Write(readbuf[:n]); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -89,7 +91,9 @@ func (a *ZipWriter) addTree(tree *git.Tree, parent string) error {
 	for _, te := range entries {
 		path := filepath.Join(parent, te.Name())
 		if te.IsDir() {
-			a.writer.Create(path + "/")
+			if _, err := a.writer.Create(path + "/"); err != nil {
+				return err
+			}
 			subtree, _ := tree.SubTree(te.Name())
 			if err := a.addTree(subtree, path); err != nil {
 				return err
