@@ -33,9 +33,14 @@ func unzip(fname string, dest string) error {
 		}
 		if file.Mode()|os.ModeSymlink == file.Mode() {
 			// create link
-			data, _ := ioutil.ReadAll(fr)
-			if err := os.Symlink(string(data), filepath.Join(dest, file.Name)); err != nil {
-				return err
+			data, err := ioutil.ReadAll(fr)
+			if err != nil {
+				return fmt.Errorf("failed to read link target from file %q in zip file: %s", file.Name, err.Error())
+			}
+
+			linkdest := filepath.Join(dest, file.Name)
+			if err := os.Symlink(string(data), linkdest); err != nil {
+				return fmt.Errorf("failed to create symlink %q -> %q: %s", string(data), linkdest, err.Error())
 			}
 			continue
 		}
@@ -70,23 +75,34 @@ func checkfiles(root string) error {
 		if info.IsDir() {
 			return nil
 		}
-		relpath, _ := filepath.Rel(root, curpath)
+		relpath, err := filepath.Rel(root, curpath)
+		if err != nil {
+			return fmt.Errorf("found unexpected path %q outside root %q", curpath, root)
+		}
 
 		expHash, ok := hashes[relpath]
 		if !ok {
 			return fmt.Errorf("unexpected file found: %s", relpath)
 		}
 
-		linfo, _ := os.Lstat(curpath)
-		if linfo.Mode()|os.ModeSymlink == linfo.Mode() {
-			target, _ := os.Readlink(curpath)
+		if info.Mode()|os.ModeSymlink == info.Mode() {
+			target, err := os.Readlink(curpath)
+			if err != nil {
+				return fmt.Errorf("failed to read link %q: %s", curpath, err.Error())
+			}
 			if target != expHash {
 				return fmt.Errorf("symlink check failed for %q: expected %q found %q", relpath, expHash, target)
 			}
 			return nil
 		}
-		fp, _ := os.Open(curpath)
-		data, _ := ioutil.ReadAll(fp)
+		fp, err := os.Open(curpath)
+		if err != nil {
+			return fmt.Errorf("failed to open file %q for reading: %s", curpath, err.Error())
+		}
+		data, err := ioutil.ReadAll(fp)
+		if err != nil {
+			return fmt.Errorf("failed reading file %q: %s", curpath, err.Error())
+		}
 		actsum := md5.Sum(data)
 		actualHash := hex.EncodeToString(actsum[:16])
 		if expHash != actualHash {
