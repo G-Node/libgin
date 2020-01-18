@@ -66,11 +66,11 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 		// replace with annexed data
 		_, annexkey := filepath.Split(string(readbuf[:n]))
 		annexkey = strings.TrimSpace(annexkey) // trim newlines and spaces
-		loc, err := git.NewCommand("annex", "contentlocation", annexkey).RunInDir(a.Repository.Path)
+		loc, err := annex.ContentLocation(a.Repository, annexkey)
 		if err != nil {
 			return fmt.Errorf("content file not found: %q\n", annexkey)
 		}
-		loc = strings.TrimRight(loc, "\n")
+
 		loc = filepath.Join(a.Repository.Path, loc)
 		rc, err := os.Open(loc)
 		if err != nil {
