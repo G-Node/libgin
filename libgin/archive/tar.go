@@ -63,18 +63,21 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 	readbuf := make([]byte, 10240)
 	if annex.IsAnnexFile(blob) {
 		n, err := reader.Read(readbuf)
+		if err != nil {
+			return fmt.Errorf("failed to read annex pointer blob %q: %s", fname, err.Error())
+		}
 		// replace with annexed data
 		_, annexkey := filepath.Split(string(readbuf[:n]))
 		annexkey = strings.TrimSpace(annexkey) // trim newlines and spaces
 		loc, err := annex.ContentLocation(a.Repository, annexkey)
 		if err != nil {
-			return fmt.Errorf("content file not found: %q\n", annexkey)
+			return fmt.Errorf("content file not found: %q", annexkey)
 		}
 
 		loc = filepath.Join(a.Repository.Path, loc)
 		rc, err := os.Open(loc)
 		if err != nil {
-			return fmt.Errorf("failed to open content file: %s\n", err.Error())
+			return fmt.Errorf("failed to open content file: %s", err.Error())
 		}
 		// copy mode from content file
 		rcInfo, _ := rc.Stat()
