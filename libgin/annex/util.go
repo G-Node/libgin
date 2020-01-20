@@ -81,10 +81,16 @@ func ContentLocation(repo *git.Repository, key string) (string, error) {
 	// there are two possible object paths depending on annex version
 	// the most common one is the newest, but we should try both anyway
 	objectpath := filepath.Join(objectstore, hashdirmixed(key), key)
-	if _, err := os.Stat(objectpath); os.IsNotExist(err) {
+	if _, err := os.Stat(objectpath); err != nil {
+		if !os.IsNotExist(err) {
+			return "", fmt.Errorf("unexpected error occurred while trying to stat %q: %s", objectpath, err)
+		}
 		// try the other one
 		objectpath = filepath.Join(objectstore, hashdirlower(key), key)
-		if _, err = os.Stat(objectpath); os.IsNotExist(err) {
+		if _, err = os.Stat(objectpath); err != nil {
+			if !os.IsNotExist(err) {
+				return "", fmt.Errorf("unexpected error occurred while trying to stat %q: %s", objectpath, err)
+			}
 			return "", fmt.Errorf("failed to find content for key %q: %s", key, err.Error())
 		}
 	}
