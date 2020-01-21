@@ -15,10 +15,9 @@ type ArchiveType int
 const (
 	ArchiveZip ArchiveType = iota + 1
 	ArchiveTarGz
-	ArchiveGIN
 )
 
-func (c *Commit) CreateArchive(target string, archiveType ArchiveType, cloneL string) error {
+func (c *Commit) CreateArchive(target string, archiveType ArchiveType) error {
 	var format string
 	switch archiveType {
 	case ArchiveZip:

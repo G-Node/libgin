@@ -1,4 +1,6 @@
-# github.com/G-Node/git-module v0.8.4-gnode
+# github.com/G-Node/git-module v0.8.4-gnode4
 github.com/G-Node/git-module
+# github.com/gogs/git-module v0.8.3
+github.com/gogs/git-module
 # github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 github.com/mcuadros/go-version

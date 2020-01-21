@@ -1,4 +1,4 @@
-package libgin
+package archive
 
 import (
 	"archive/zip"
@@ -7,12 +7,23 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gogs/git-module"
 )
+
+type Writer interface {
+	Write(target string) error
+	addTree(tree *git.Tree, path string) error
+	addBlob(blob *git.Blob, path string) error
+}
 
 // MakeZip recursively writes all the files found under the provided sources to
 // the dest io.Writer in ZIP format.  Any directories listed in source are
 // archived recursively.  Empty directories are ignored.
 func MakeZip(dest io.Writer, source ...string) error {
+	// NOTE: Old function that clones and zips repositories.
+	//       Does not support commits other than master
+
 	// check sources
 	for _, src := range source {
 		if _, err := os.Stat(src); err != nil {
