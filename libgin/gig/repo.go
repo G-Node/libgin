@@ -54,7 +54,6 @@ func IsBareRepository(path string) bool {
 //verifies that it is a (bare) repository and returns an
 //error if the check fails.
 func OpenRepository(path string) (*Repository, error) {
-
 	path, err := filepath.Abs(path)
 	if err != nil {
 		return nil, fmt.Errorf("git: could not determine absolute path")
