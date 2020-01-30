@@ -91,6 +91,10 @@ func (c *DOIRegInfo) ISODate() string {
 	return c.DateTime.Format("2006-01-02")
 }
 
+func (c *DOIRegInfo) PrettyDate() string {
+	return c.DateTime.Format("02 Jan. 2006")
+}
+
 // AuthorBlock builds the author section for the landing page template.
 // It includes a list of authors, their affiliations, and superscripts to associate authors with affiliations.
 // This is a utility function for the landing page HTML template.
