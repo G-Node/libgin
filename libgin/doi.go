@@ -115,7 +115,7 @@ func (c *DOIRegInfo) AuthorBlock() template.HTML {
 			}
 			affiliationSup = fmt.Sprintf("<sup>%d</sup>", affiliationMap[author.Affiliation])
 		}
-		names[idx] = fmt.Sprintf("%s <strong>%s</strong>%s", author.FirstName, author.LastName, affiliationSup)
+		names[idx] = fmt.Sprintf("%s %s%s", author.FirstName, author.LastName, affiliationSup)
 	}
 
 	authorLine := fmt.Sprintf("<span class=\"doi author\">%s</span>", strings.Join(names, ", "))
