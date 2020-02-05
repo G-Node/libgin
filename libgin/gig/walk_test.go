@@ -7,13 +7,13 @@ import (
 func TestWalkRef(t *testing.T) {
 	rep, err := OpenRepository("tdata/repo1.git")
 	if err != nil {
-		t.Errorf("Could not open test repository:%v", err)
+		t.Errorf("Could not open test repository: %s", err.Error())
 	}
 	commits, err := rep.WalkRef("tag1", func(commitId SHA1) bool {
 		return true
 	})
 	if err != nil {
-		t.Errorf("Could not walk master repository:%v", err)
+		t.Errorf("Could not walk master repository: %s", err.Error())
 		return
 	}
 	t.Logf("Got commits: %v", commits)
@@ -26,12 +26,12 @@ func TestWalkRef(t *testing.T) {
 func TestGetBlobs(t *testing.T) {
 	rep, err := OpenRepository("tdata/repo1.git")
 	if err != nil {
-		t.Errorf("Could not open test repository:%v", err)
+		t.Errorf("Could not open test repository: %s", err.Error())
 	}
 	id_commit, _ := ParseSHA1("f8306602c14ab6f49dae674513b6f6a7748e6f09")
 	com, err := rep.OpenObject(id_commit)
 	if err != nil {
-		t.Errorf("Could not open commit:%v", err)
+		t.Errorf("Could not open commit: %s", err.Error())
 	}
 	blobs := make(map[SHA1]*Blob)
 	rep.GetBlobsForCommit(com.(*Commit), blobs)

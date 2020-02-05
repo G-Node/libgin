@@ -1,6 +1,7 @@
 package annex
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -13,22 +14,23 @@ func Test_NewAFile(t *testing.T) {
 		t.Logf("%v", err)
 		t.Fail()
 	}
-	fp, err := af.Open()
-	defer fp.Close()
-	if err != nil {
-		t.Logf("Opening annex file failed: %v", err)
-		t.Fail()
+	if af == nil {
+		t.Fatal("Nil Annex file reference without error")
 	}
+	fmt.Println(af.Filepath)
+	fp, err := af.Open()
+	if err != nil {
+		t.Fatalf("Opening annex file failed: %v", err)
+	}
+	defer fp.Close()
 
 	af, err = NewAFile("testdata", "testdata/fakerepo.git", "bigfile.big", []byte(link2))
 	if err != nil {
-		t.Logf("annexfile %v, error: %v", af, err)
-		t.Fail()
+		t.Fatalf("annexfile %v, error: %v", af, err)
 	}
 	fp, err = af.Open()
-	defer fp.Close()
 	if err != nil {
-		t.Logf("Opening annex file failed: %v", err)
-		t.Fail()
+		t.Fatalf("Opening annex file failed: %v", err)
 	}
+	defer fp.Close()
 }

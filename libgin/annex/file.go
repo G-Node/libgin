@@ -61,7 +61,6 @@ func NewAFile(annexpath, repopath, Ofilename string, APFileC []byte) (*AFile, er
 		return nil, AnnexFileNotFound{error: fmt.Errorf("Could not find File: %s anywhere below: %s", filename,
 			filepath.Join(annexpath, repopath))}
 	}
-
 }
 
 func (af *AFile) Open() (*os.File, error) {

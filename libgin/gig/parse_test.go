@@ -149,8 +149,8 @@ func TestParseTag(t *testing.T) {
 		tag.Tagger != FakeSignedTag.Tagger &&
 		tag.Object != FakeSignedTag.Object &&
 		tag.ObjType != FakeSignedTag.ObjType {
-		t.Logf("[E] tag returned:\n%s\n", tag)
-		t.Logf("[E] tag expected:\n%s\n", FakeSignedTag)
+		t.Logf("[E] tag returned:\n%s\n", tag.Tag)
+		t.Logf("[E] tag expected:\n%s\n", FakeSignedTag.Tag)
 		t.Fail()
 	}
 	t.Log("Parse Signed Tag [OK!]")
@@ -170,8 +170,8 @@ func TestParseTag(t *testing.T) {
 		tag.Tagger != FakeUnsignedTag.Tagger &&
 		tag.Object != FakeUnsignedTag.Object &&
 		tag.ObjType != FakeUnsignedTag.ObjType {
-		t.Logf("[E] tag returned:\n%s\n", tag)
-		t.Logf("[E] tag expected:\n%s\n", FakeSignedTag)
+		t.Logf("[E] tag returned:\n%s\n", tag.Tag)
+		t.Logf("[E] tag expected:\n%s\n", FakeSignedTag.Tag)
 		t.Fail()
 	}
 	t.Log("Parse Unsigned Tag [OK!]")
