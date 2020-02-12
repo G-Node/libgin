@@ -105,11 +105,12 @@ func (c *Author) GetValidID() *NamedIdentifier {
 	if c.ID == "" {
 		return nil
 	}
-	if strings.Contains(strings.ToLower(c.ID), "orcid") {
-		// assume the orcid id is a four block number thing eg. 0000-0002-5947-9939
-		var re = regexp.MustCompile(`(\d+-\d+-\d+-\d+)`)
-		nid := string(re.Find([]byte(c.ID)))
-		return &NamedIdentifier{URI: "https://orcid.org/", Scheme: "ORCID", ID: nid}
+	if strings.HasPrefix(strings.ToLower(c.ID), "orcid:") {
+		var re = regexp.MustCompile(`^([[:digit:]]{4}-){3}[[:digit:]]{4}$`)
+		orcid := strings.TrimPrefix(strings.ToLower(c.ID), "orcid:")
+		if re.Match([]byte(orcid)) {
+			return &NamedIdentifier{URI: fmt.Sprintf("https://orcid.org/%s", orcid), Scheme: "ORCID", ID: orcid}
+		}
 	}
 	return nil
 }
