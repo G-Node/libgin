@@ -105,13 +105,13 @@ func (c *Author) GetValidID() *NamedIdentifier {
 	if c.ID == "" {
 		return nil
 	}
-	if strings.HasPrefix(strings.ToLower(c.ID), "orcid:") {
+	if strings.HasPrefix(strings.ToLower(c.ID), "orcid") {
 		// four blocks of four numbers separated by dash; last character can be X
 		// https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
-		var re = regexp.MustCompile(`^([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]$`)
-		orcid := strings.TrimPrefix(strings.ToLower(c.ID), "orcid:")
-		if re.Match([]byte(orcid)) {
-			return &NamedIdentifier{URI: fmt.Sprintf("https://orcid.org/%s", orcid), Scheme: "ORCID", ID: orcid}
+		var re = regexp.MustCompile(`([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]`)
+		// orcid := strings.TrimPrefix(strings.ToLower(c.ID), "orcid:")
+		if orcid := re.Find([]byte(c.ID)); orcid != nil {
+			return &NamedIdentifier{URI: fmt.Sprintf("https://orcid.org/%s", string(orcid)), Scheme: "ORCID", ID: string(orcid)}
 		}
 	}
 	return nil
