@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"regexp"
@@ -93,34 +92,6 @@ func (c *DOIRegInfo) ISODate() string {
 
 func (c *DOIRegInfo) PrettyDate() string {
 	return c.DateTime.Format("02 Jan. 2006")
-}
-
-// AuthorBlock builds the author section for the landing page template.
-// It includes a list of authors, their affiliations, and superscripts to associate authors with affiliations.
-// This is a utility function for the landing page HTML template.
-func (c *DOIRegInfo) AuthorBlock() template.HTML {
-	authors := c.Authors
-	names := make([]string, len(authors))
-	affiliations := make([]string, 0)
-	affiliationMap := make(map[string]int)
-	// Collect names and figure out affiliation numbering
-	for idx, author := range authors {
-		var affiliationSup string // if there's no affiliation, don't add a superscript
-		if author.Affiliation != "" {
-			if _, ok := affiliationMap[author.Affiliation]; !ok {
-				// new affiliation; give it a new number, otherwise the existing one will be used below
-				num := len(affiliationMap) + 1
-				affiliationMap[author.Affiliation] = num
-				affiliations = append(affiliations, fmt.Sprintf("<li><sup>%d</sup>%s</li>", num, author.Affiliation))
-			}
-			affiliationSup = fmt.Sprintf("<sup>%d</sup>", affiliationMap[author.Affiliation])
-		}
-		names[idx] = fmt.Sprintf("%s %s%s", author.FirstName, author.LastName, affiliationSup)
-	}
-
-	authorLine := fmt.Sprintf("<span class=\"doi author\">%s</span>", strings.Join(names, ", "))
-	affiliationLine := fmt.Sprintf("<ol class=\"doi itemlist\">%s</ol>", strings.Join(affiliations, "\n"))
-	return template.HTML(authorLine + "\n" + affiliationLine)
 }
 
 type Author struct {
