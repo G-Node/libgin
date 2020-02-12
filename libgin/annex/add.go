@@ -3,7 +3,7 @@ package annex
 import (
 	"fmt"
 
-	git "github.com/G-Node/git-module"
+	"github.com/gogs/git-module"
 )
 
 const (
@@ -15,12 +15,12 @@ const (
 )
 
 func Init(dir string, args ...string) (string, error) {
-	cmd := git.NewACommand("init")
+	cmd := git.NewCommand("annex", "init")
 	return cmd.AddArguments(args...).RunInDir(dir)
 }
 
 func Uninit(dir string, args ...string) (string, error) {
-	cmd := git.NewACommand("uninit")
+	cmd := git.NewCommand("annex", "uninit")
 	return cmd.AddArguments(args...).RunInDir(dir)
 }
 
@@ -34,13 +34,13 @@ func MD5(dir string) (string, error) {
 	return cmd.RunInDir(dir)
 }
 
-func ASync(dir string, args ...string) (string, error) {
-	cmd := git.NewACommand("sync")
+func Sync(dir string, args ...string) (string, error) {
+	cmd := git.NewCommand("annex", "sync")
 	return cmd.AddArguments(args...).RunInDir(dir)
 }
 
 func Add(dir string, args ...string) (string, error) {
-	cmd := git.NewACommand("add")
+	cmd := git.NewCommand("annex", "add")
 	cmd.AddArguments(args...)
 	return cmd.RunInDir(dir)
 }
