@@ -106,7 +106,9 @@ func (c *Author) GetValidID() *NamedIdentifier {
 		return nil
 	}
 	if strings.HasPrefix(strings.ToLower(c.ID), "orcid:") {
-		var re = regexp.MustCompile(`^([[:digit:]]{4}-){3}[[:digit:]]{4}$`)
+		// four blocks of four numbers separated by dash; last character can be X
+		// https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
+		var re = regexp.MustCompile(`^([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]$`)
 		orcid := strings.TrimPrefix(strings.ToLower(c.ID), "orcid:")
 		if re.Match([]byte(orcid)) {
 			return &NamedIdentifier{URI: fmt.Sprintf("https://orcid.org/%s", orcid), Scheme: "ORCID", ID: orcid}
