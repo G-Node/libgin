@@ -1,11 +1,3 @@
-github.com/G-Node/gig v0.0.0-20171025133355-6d784b40b534/go.mod h1:H+82VbQUp9AzlbEiZl3bri3mlPlN2q6CxlIh0CyJWnc=
-github.com/G-Node/git-module v0.8.4-0.20191218161021-3fd4d7aaf932/go.mod h1:VYqGwMiaOacy+pch//bmTW0HnfVxZA6VnFSvzOOwpX0=
-github.com/G-Node/git-module v0.8.4-gnode4 h1:5V/0qMjrrKHwZI4LxM3346vjkw52189UprlUVLfnKgY=
-github.com/G-Node/git-module v0.8.4-gnode4/go.mod h1:TdKR+8dChXtB7Hw3xS4Bfn5QQenPnihuoWx/vnSnb1k=
-github.com/G-Node/libgin v0.0.0-20191216094436-47f8aadc0067/go.mod h1:2yLXQnNbwjH8mslxnzU8Kb+d7c2Zqo8DIgR6Pgp7lCg=
-github.com/G-Node/libgin v0.3.0/go.mod h1:VjulCBq7k/kgf4Eabk2f4w9SDNowWhLnK+yZvy5Nppk=
-github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/docker/docker v1.13.1/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/gogs/git-module v0.8.3 h1:9f8oxSs9OACWrGBYMVnnQNzyTcVN+zzcBM7CXnbmezw=
 github.com/gogs/git-module v0.8.3/go.mod h1:aj4tcm7DxaszJWpZLZIRL6gfPXyguAHiE1PDfAAPrCw=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 h1:EGx4pi6eqNxGaHF6qqu48+N2wcFQ5qg5FXgOdqsJ5d8=
