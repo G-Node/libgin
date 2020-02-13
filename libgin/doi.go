@@ -111,7 +111,7 @@ func (c *Author) GetValidID() *NamedIdentifier {
 		var re = regexp.MustCompile(`([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]`)
 		// orcid := strings.TrimPrefix(strings.ToLower(c.ID), "orcid:")
 		if orcid := re.Find([]byte(c.ID)); orcid != nil {
-			return &NamedIdentifier{URI: fmt.Sprintf("https://orcid.org/%s", string(orcid)), Scheme: "ORCID", ID: string(orcid)}
+			return &NamedIdentifier{SchemeURI: "http://orcid.org/", Scheme: "ORCID", ID: string(orcid)}
 		}
 	}
 	return nil
@@ -122,9 +122,9 @@ func (a *Author) RenderAuthor() string {
 }
 
 type NamedIdentifier struct {
-	URI    string
-	Scheme string
-	ID     string
+	SchemeURI string
+	Scheme    string
+	ID        string
 }
 
 type Reference struct {
