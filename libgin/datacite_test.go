@@ -16,7 +16,7 @@ func Test_DataCiteMarshal(t *testing.T) {
 
 	example.Titles = []string{"This is a sample"}
 	example.AddAbstract("This is the abstract")
-	example.RightsList = Rights{"CC-BY", "http://creativecommons.org/licenses/by/4.0/"}
+	example.RightsList = []Rights{Rights{"CC-BY", "http://creativecommons.org/licenses/by/4.0/"}}
 	example.Subjects = []string{"One", "Two", "Three"}
 	example.AddFunding("DFG, DFG.12345")
 	example.AddFunding("EU, EU.12345")

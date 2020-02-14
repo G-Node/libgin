@@ -75,7 +75,7 @@ type DataCite struct {
 	Titles       []string      `xml:"titles>title"`
 	Descriptions []Description `xml:"descriptions>description"`
 	// RightsList: Licenses
-	RightsList Rights `xml:"rightsList>rights"`
+	RightsList []Rights `xml:"rightsList>rights"`
 	// Subjects: Keywords
 	Subjects []string `xml:"subjects>subject,omitempty"`
 	// RelatedIdentifiers: References
