@@ -72,7 +72,7 @@ type DataCite struct {
 	// Creators: Authors
 	Creators     []Creator     `xml:"creators>creator"`
 	Titles       []string      `xml:"titles>title"`
-	Descriptions []Description `xml:"descriptions"`
+	Descriptions []Description `xml:"descriptions>description"`
 	// RightsList: Licenses
 	RightsList Rights `xml:"rightsList>rights"`
 	// Subjects: Keywords
