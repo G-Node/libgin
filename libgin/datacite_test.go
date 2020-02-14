@@ -17,20 +17,16 @@ func Test_DataCiteMarshal(t *testing.T) {
 	example.Titles = []string{"This is a sample"}
 	example.Descriptions = []Description{
 		Description{"This is the abstract", "Abstract"},
-		Description{"IsDescribedBy: Manuscript title for reference. doi:10.1111/example.doi", "Other"}, // TODO: Line breaks
-		Description{"IsSupplementTo: Some other work. arxiv:10.2222/example.doi", "Other"},
-		Description{"IsReferencedBy: A work that references this dataset. doi:10.3333/example.doi", "Other"},
 	}
 	example.RightsList = Rights{"CC-BY", "http://creativecommons.org/licenses/by/4.0/"}
 	example.Subjects = []string{"One", "Two", "Three"}
 	example.AddFunding("DFG, DFG.12345")
 	example.AddFunding("EU, EU.12345")
-	example.RelatedIdentifiers = []RelatedIdentifier{
-		RelatedIdentifier{"10.1111/example.doi", "DOI", "IsDescribedBy"},
-		RelatedIdentifier{"10.2222/example.doi", "arxiv", "IsSupplementTo"},
-		RelatedIdentifier{"10.3333/example.doi", "DOI", "IsReferencedBy"},
-	}
 	example.SetResourceType("Dataset")
+
+	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", Reftype: "IsDescribedBy", Name: "Manuscript title for reference."})
+	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", Reftype: "IsSupplementTo", Name: "Some other work"})
+	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", Reftype: "IsReferencedBy", Name: "A work that references this dataset."})
 
 	dataciteXML, err := xml.MarshalIndent(example, "", "\t")
 	if err != nil {
