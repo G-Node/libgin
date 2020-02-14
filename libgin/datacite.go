@@ -44,9 +44,9 @@ type RelatedIdentifier struct {
 }
 
 type FundingReference struct {
-	Funder         string `xml:"funderName"`
-	Identifier     string `xml:"funderIdentifier"`
-	IdentifierType string `xml:"funderIdentifierType,attr"`
+	Funder      string `xml:"funderName"`
+	AwardNumber string `xml:"awardNumber"`
+	// TODO: Add identifier for known funders
 }
 
 type Contributor struct {
@@ -121,18 +121,17 @@ func (dc *DataCite) SetResourceType(resourceType string) {
 }
 
 // AddFunding is a convenience function for appending a FundingReference in the
-// format of the YAML data (FUNDER, ID) without needing to specify the
-// "Crossref Funder ID" funderIdentifierType.
+// format of the YAML data (<FUNDER>, <AWARDNUMBER>).
 func (dc *DataCite) AddFunding(fundstr string) {
 	funParts := strings.SplitN(fundstr, ",", 2)
-	var funder, id string
+	var funder, awardNumber string
 	if len(funParts) == 2 {
 		funder = strings.TrimSpace(funParts[0])
-		id = strings.TrimSpace(funParts[1])
+		awardNumber = strings.TrimSpace(funParts[1])
 	} else {
-		// No comma, add to ID as is
-		id = fundstr
+		// No comma, add to award number as is
+		awardNumber = fundstr
 	}
-	fundref := FundingReference{Funder: funder, Identifier: id, IdentifierType: "Crossref Funder ID"}
+	fundref := FundingReference{Funder: funder, AwardNumber: awardNumber}
 	dc.FundingReferences = append(dc.FundingReferences, fundref)
 }
