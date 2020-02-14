@@ -17,16 +17,18 @@ func Test_DataCiteMarshal(t *testing.T) {
 	example.Titles = []string{"This is a sample"}
 	example.Descriptions = []Description{
 		Description{"This is the abstract", "Abstract"},
-		Description{"This is something else\nSomething else entirely", "Other"}, // TODO: Line breaks
+		Description{"IsDescribedBy: Manuscript title for reference. doi:10.1111/example.doi", "Other"}, // TODO: Line breaks
+		Description{"IsSupplementTo: Some other work. arxiv:10.2222/example.doi", "Other"},
+		Description{"IsReferencedBy: A work that references this dataset. doi:10.3333/example.doi", "Other"},
 	}
 	example.RightsList = Rights{"CC-BY", "http://creativecommons.org/licenses/by/4.0/"}
 	example.Subjects = []string{"One", "Two", "Three"}
 	example.AddFunding("DFG, DFG.12345")
 	example.AddFunding("EU, EU.12345")
 	example.RelatedIdentifiers = []RelatedIdentifier{
-		RelatedIdentifier{"10.1111/fake.doi", "DOI", "IsDescribedBy"},
-		RelatedIdentifier{"10.2222/fake.doi", "DOI", "IsSupplementTo"},
-		RelatedIdentifier{"10.3333/fake.doi", "DOI", "IsReferencedBy"},
+		RelatedIdentifier{"10.1111/example.doi", "DOI", "IsDescribedBy"},
+		RelatedIdentifier{"10.2222/example.doi", "arxiv", "IsSupplementTo"},
+		RelatedIdentifier{"10.3333/example.doi", "DOI", "IsReferencedBy"},
 	}
 	example.SetResourceType("Dataset")
 
