@@ -21,12 +21,8 @@ func Test_DataCiteMarshal(t *testing.T) {
 	}
 	example.RightsList = Rights{"CC-BY", "http://creativecommons.org/licenses/by/4.0/"}
 	example.Subjects = []string{"One", "Two", "Three"}
-	example.FundingReferences = []FundingReference{
-		FundingReference{"DFG", "DFG.12345", "Crossref Funder ID"},
-		FundingReference{"EU", "EU.12345", "Crossref Funder ID"},
-	}
-	// example.AddFunding("DFG, DFG.12345")
-	// example.AddFunding("EU, EU.12345")
+	example.AddFunding("DFG, DFG.12345")
+	example.AddFunding("EU, EU.12345")
 	example.RelatedIdentifiers = []RelatedIdentifier{
 		RelatedIdentifier{"10.1111/fake.doi", "DOI", "IsDescribedBy"},
 		RelatedIdentifier{"10.2222/fake.doi", "DOI", "IsSupplementTo"},
