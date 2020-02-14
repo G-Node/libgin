@@ -2,6 +2,7 @@ package libgin
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -134,4 +135,39 @@ func (dc *DataCite) AddFunding(fundstr string) {
 	}
 	fundref := FundingReference{Funder: funder, AwardNumber: awardNumber}
 	dc.FundingReferences = append(dc.FundingReferences, fundref)
+}
+
+// AddReference is a convenience function for appending a RelatedIdentifier
+// that describes a referenced work. The RelatedIdentifier includes the
+// identifier, relation type, and identifier type. A full citation string is
+// also added to the Descriptions list.
+func (dc *DataCite) AddReference(ref *Reference) {
+	// Add info as RelatedIdentifier
+	refIDParts := strings.SplitN(ref.ID, ":", 2)
+	var relIDType, relID string
+	if len(refIDParts) == 2 {
+		relIDType = strings.TrimSpace(refIDParts[0])
+		relID = strings.TrimSpace(refIDParts[1])
+	} else {
+		// No colon, add to ID as is
+		relID = ref.ID
+	}
+
+	relatedIdentifier := RelatedIdentifier{Identifier: relID, Type: relIDType, RelationType: ref.Reftype}
+	dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+
+	// Add citation string as Description
+	var namecitation string
+	if ref.Name != "" && ref.Citation != "" {
+		namecitation = ref.Name + " " + ref.Citation
+	} else {
+		namecitation = ref.Name + ref.Citation
+	}
+
+	if !strings.HasSuffix(namecitation, ".") {
+		namecitation += "."
+	}
+	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s)", ref.Reftype, namecitation, ref.ID), Type: "Other"}
+
+	dc.Descriptions = append(dc.Descriptions, refDesc)
 }
