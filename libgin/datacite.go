@@ -3,6 +3,7 @@ package libgin
 import (
 	"encoding/xml"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -115,6 +116,38 @@ func NewDataCite() DataCite {
 	}
 }
 
+func (dc *DataCite) AddAuthor(author *Author) {
+	authorIDParts := strings.SplitN(author.ID, ":", 2)
+	var authorIDType, authorID string
+	if len(authorIDParts) == 2 {
+		authorIDType = strings.TrimSpace(authorIDParts[0])
+		authorID = strings.TrimSpace(authorIDParts[1])
+	} else {
+		// No colon, add to ID as is
+		authorID = author.ID
+	}
+	ident := NameIdentifier{ID: authorID, Scheme: authorIDType}
+	if strings.ToLower(authorIDType) == "orcid" {
+		ident.SchemeURI = "http://orcid.org"
+
+		// Check if it's a correct ORCID:
+		// Must be four blocks of four numbers separated by dash; last character can be X
+		// https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
+		var re = regexp.MustCompile(`^([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]$`)
+		ident.Scheme = "ORCID"
+		if !re.Match([]byte(authorID)) {
+			// TODO: Warn about malformed ID somehow
+			// ident.Scheme += " (CHECK ID)"
+		}
+	}
+	creator := Creator{
+		Name:        fmt.Sprintf("%s %s", author.FirstName, author.LastName),
+		Identifier:  &ident,
+		Affiliation: author.Affiliation,
+	}
+	dc.Creators = append(dc.Creators, creator)
+}
+
 // AddAbstract is a convenience function for adding a Description with type
 // "Abstract".
 func (dc *DataCite) AddAbstract(abstract string) {
@@ -176,4 +209,23 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s)", ref.Reftype, namecitation, ref.ID), Type: "Other"}
 
 	dc.Descriptions = append(dc.Descriptions, refDesc)
+}
+
+func NewDataCiteFromRegInfo(regInfo *DOIRegInfo) *DataCite {
+	datacite := NewDataCite()
+	for _, author := range regInfo.Authors {
+		datacite.AddAuthor(&author)
+	}
+	datacite.Titles = []string{regInfo.Title}
+	datacite.AddAbstract(regInfo.Description)
+	datacite.Subjects = regInfo.Keywords
+	datacite.RightsList = []Rights{Rights{Name: regInfo.License.Name, URL: regInfo.License.URL}}
+	for _, funding := range regInfo.Funding {
+		datacite.AddFunding(funding)
+	}
+	for _, ref := range regInfo.References {
+		datacite.AddReference(&ref)
+	}
+	datacite.SetResourceType(regInfo.ResourceType)
+	return &datacite
 }
