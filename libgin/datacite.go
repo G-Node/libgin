@@ -115,6 +115,12 @@ func NewDataCite() DataCite {
 	}
 }
 
+// AddAbstract is a convenience function for adding a Description with type
+// "Abstract".
+func (dc *DataCite) AddAbstract(abstract string) {
+	dc.Descriptions = append(dc.Descriptions, Description{Content: abstract, Type: "Abstract"})
+}
+
 // SetResourceType is a convenience function for setting the ResourceType data
 // and its resourceTypeGeneral to the same value.
 func (dc *DataCite) SetResourceType(resourceType string) {
