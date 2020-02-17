@@ -105,11 +105,13 @@ func (c *Author) GetValidID() *NamedIdentifier {
 	if c.ID == "" {
 		return nil
 	}
-	if strings.Contains(strings.ToLower(c.ID), "orcid") {
-		// assume the orcid id is a four block number thing eg. 0000-0002-5947-9939
-		var re = regexp.MustCompile(`(\d+-\d+-\d+-\d+)`)
-		nid := string(re.Find([]byte(c.ID)))
-		return &NamedIdentifier{URI: "https://orcid.org/", Scheme: "ORCID", ID: nid}
+	if strings.HasPrefix(strings.ToLower(c.ID), "orcid") {
+		// four blocks of four numbers separated by dash; last character can be X
+		// https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
+		var re = regexp.MustCompile(`([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]`)
+		if orcid := re.Find([]byte(c.ID)); orcid != nil {
+			return &NamedIdentifier{SchemeURI: "http://orcid.org/", Scheme: "ORCID", ID: string(orcid)}
+		}
 	}
 	return nil
 }
@@ -119,9 +121,9 @@ func (a *Author) RenderAuthor() string {
 }
 
 type NamedIdentifier struct {
-	URI    string
-	Scheme string
-	ID     string
+	SchemeURI string
+	Scheme    string
+	ID        string
 }
 
 type Reference struct {
