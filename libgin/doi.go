@@ -39,6 +39,12 @@ type RepositoryYAML struct {
 	ResourceType    string `yaml:"resourcetype"`
 }
 
+type GINUser struct {
+	Username string
+	Email    string
+	RealName string
+}
+
 // RepositoryMetadata can contain all known metadata for a registered (or
 // to-be-registered) repository. To do this, it embeds the
 type RepositoryMetadata struct {
@@ -49,6 +55,8 @@ type RepositoryMetadata struct {
 	// The following are computed or generated from external info and don't
 	// show up in the YAML or XML files
 
+	// The user that sent the request
+	RequestingUser *GINUser
 	// Should be full repository path (<user>/<reponame>)
 	SourceRepository string
 	// Should be full repository path of the snapshot fork (doi/<rpeoname>)
