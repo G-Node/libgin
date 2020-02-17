@@ -11,6 +11,62 @@ import (
 	"time"
 )
 
+// RepositoryYAML is used to read the information provided by a GIN user
+// through the datacite.yml file. This data is usually used to populate the
+// DataCite and RepositoryMetadata types.
+type RepositoryYAML struct {
+	Authors []struct {
+		FirstName   string `yaml:"firstname"`
+		LastName    string `yaml:"lastname"`
+		Affiliation string `yaml:"affiliation,omitempty"`
+		ID          string `yaml:"id,omitempty"`
+	}
+	Title       string `yaml:"title"`
+	Description string
+	Keywords    []string `yaml:"keywords"`
+	License     struct {
+		Name string `yaml:"name"`
+		URL  string `yaml:"url"`
+	}
+	Funding    []string `yaml:"funding,omitempty"`
+	References struct {
+		ID       string `yaml:"string"`
+		RefType  string `yaml:"reftype"`
+		Name     string `yaml:"name"`     // deprecated, but still read for older versions
+		Citation string `yaml:"citation"` // meant to replace Name
+	}
+	TemplateVersion string `yaml:"templateversion,omitempty"`
+	ResourceType    string `yaml:"resourcetype"`
+}
+
+// RepositoryMetadata can contain all known metadata for a registered (or
+// to-be-registered) repository. To do this, it embeds the
+type RepositoryMetadata struct {
+	// YAMLData is the original data coming from the repository
+	YAMLData *RepositoryYAML
+	// DataCite is the struct that produces the XML file
+	*DataCite
+	// The following are computed or generated from external info and don't
+	// show up in the YAML or XML files
+
+	// Should be full repository path (<user>/<reponame>)
+	SourceRepository string
+	// Should be full repository path of the snapshot fork (doi/<rpeoname>)
+	ForkRepository string
+	// The calculated or assigned DOI
+	DOI string
+	// UUID calculated from unique repository path or randomly assigned
+	UUID string
+	// URL to the registered dataset archive
+	ArchiveURL string
+	// URL to the landing page of the published dataset
+	PageURL string
+	// File size for the archive (in bytes)
+	ArchiveSize int
+	// Registration date (time can also be stored, but is not necessary)
+	DateTime time.Time
+}
+
 // NOTE: TEMPORARY COPIES FROM gin-doi
 
 // UUIDMap is a map between registered repositories and their UUIDs for
