@@ -109,7 +109,6 @@ func (c *Author) GetValidID() *NamedIdentifier {
 		// four blocks of four numbers separated by dash; last character can be X
 		// https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
 		var re = regexp.MustCompile(`([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]`)
-		// orcid := strings.TrimPrefix(strings.ToLower(c.ID), "orcid:")
 		if orcid := re.Find([]byte(c.ID)); orcid != nil {
 			return &NamedIdentifier{SchemeURI: "http://orcid.org/", Scheme: "ORCID", ID: string(orcid)}
 		}
