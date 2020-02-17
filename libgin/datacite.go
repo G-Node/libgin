@@ -80,7 +80,7 @@ type DataCite struct {
 	// Subjects: Keywords
 	Subjects []string `xml:"subjects>subject,omitempty"`
 	// RelatedIdentifiers: References
-	RelatedIdentifiers []RelatedIdentifier `xml:"relatedIdentifiers,omitempty>relatedIdentifier"`
+	RelatedIdentifiers []RelatedIdentifier `xml:"relatedIdentifiers>relatedIdentifier,omitempty"`
 	FundingReferences  []FundingReference  `xml:"fundingReferences>fundingReference,omitempty"`
 	// Contributors: Always German Neuroinformatics Node with type "HostingInstitution"
 	Contributors []Contributor `xml:"contributors>contributor"`
