@@ -3,7 +3,10 @@ package libgin
 import (
 	"encoding/xml"
 	"fmt"
+	"math"
+	"math/rand"
 	"testing"
+	"time"
 )
 
 func Test_DataCiteMarshal(t *testing.T) {
@@ -87,4 +90,162 @@ func Test_DataCiteFromRegInfo(t *testing.T) {
 	}
 
 	fmt.Println(xml.Header + string(dataciteXML))
+}
+
+func Test_parseAuthorID(t *testing.T) {
+
+	rand.Seed(time.Now().UnixNano())
+
+	randNumStr := func(ndigits int) string {
+		maxValue := int64(math.Pow10(ndigits))
+		fmtstr := fmt.Sprintf("%%0%dd", ndigits)
+		return fmt.Sprintf(fmtstr, rand.Int63n(maxValue))
+	}
+
+	if ident := parseAuthorID(""); ident != nil {
+		t.Fatal("Empty author ID should return nil")
+	}
+
+	validORCIDs := []string{
+		// valid, all 0s (different delimiters)
+		"orcid.0000-0000-0000-0000",
+		"orcid|0000-0000-0000-0000",
+		"orcid/0000-0000-0000-0000",
+		"orcid:0000-0000-0000-0000",
+
+		// valid, all 0s, X checksum
+		"orcid.0000-0000-0000-000X",
+		"orcid|0000-0000-0000-000X",
+		"orcid/0000-0000-0000-000X",
+		"orcid:0000-0000-0000-000X",
+
+		// Valid random
+		fmt.Sprintf("orcid.%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("orcid|%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("orcid/%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("orcid:%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+
+		// Valid random with X checksum
+		fmt.Sprintf("orcid.%s-%s-%s-%sX", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(3)),
+		fmt.Sprintf("orcid|%s-%s-%s-%sX", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(3)),
+		fmt.Sprintf("orcid/%s-%s-%s-%sX", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(3)),
+		fmt.Sprintf("orcid:%s-%s-%s-%sX", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(3)),
+
+		// Valid random as URL
+		fmt.Sprintf("orcid.org/%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("orcid.org/%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("orcid.org/%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("orcid.org/%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+
+		// Valid random uppercase
+		fmt.Sprintf("ORCID.%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("ORCID|%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("ORCID/%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("ORCID:%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+	}
+
+	for _, id := range validORCIDs {
+		ident := parseAuthorID(id)
+		if ident == nil {
+			t.Fatalf("Author ID parse failed for %q", id)
+		}
+		if ident.Scheme != "ORCID" {
+			t.Fatalf("Author ID parse failed for %q: Invalid Scheme detected %q", id, ident.Scheme)
+		}
+	}
+
+	invalidORCIDs := []string{
+		// Invalid random
+		fmt.Sprintf("orcid.%s-%s-%s-%sX", randNumStr(2), randNumStr(2), randNumStr(2), randNumStr(2)),
+		fmt.Sprintf("orcid|%s-%s-%s-%sX", randNumStr(4), randNumStr(4), randNumStr(3), randNumStr(4)),
+		fmt.Sprintf("orcid/%s-%s-%s-%sX", randNumStr(3), randNumStr(4), randNumStr(4), randNumStr(3)),
+		fmt.Sprintf("orcid:%s-%s-%s-%s", randNumStr(3), randNumStr(5), randNumStr(4), randNumStr(4)),
+	}
+
+	for _, id := range invalidORCIDs {
+		ident := parseAuthorID(id)
+		if ident == nil {
+			t.Fatalf("Author ID parse failed for %q", id)
+		}
+		if ident.Scheme != "" {
+			t.Fatalf("Invalid author ORCID produced valid response for %q: Detected scheme %q (should be empty)", id, ident.Scheme)
+		}
+		if ident.ID != id {
+			t.Fatalf("Invalid author ORCID produced invalid ID: %q", id)
+		}
+	}
+
+	validRIDs := []string{
+		// valid, all 0s (different delimiters)
+		"ResearcherID.A-0000-0000",
+		"ResearcherID|B-0000-0000",
+		"ResearcherID/C-0000-0000",
+		"ResearcherID:D-0000-0000",
+		"ResearcherID.E-0000-0000",
+
+		// Valid random
+		fmt.Sprintf("ResearcherID.F-%s-%s", randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("ResearcherID|G-%s-%s", randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("ResearcherID/H-%s-%s", randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("ResearcherID:I-%s-%s", randNumStr(4), randNumStr(4)),
+
+		// Valid random (all lowercase)
+		fmt.Sprintf("researcherid.J-%s-%s", randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("researcherid|K-%s-%s", randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("researcherid/L-%s-%s", randNumStr(4), randNumStr(4)),
+		fmt.Sprintf("researcherid:M-%s-%s", randNumStr(4), randNumStr(4)),
+	}
+
+	for _, id := range validRIDs {
+		ident := parseAuthorID(id)
+		if ident == nil {
+			t.Fatalf("Author ID parse failed for %q", id)
+		}
+		if ident.Scheme != "ResercherID" {
+			t.Fatalf("Author ID parse failed for %q: Invalid Scheme detected %q", id, ident.Scheme)
+		}
+	}
+
+	invalidRIDs := []string{
+		// Invalid random
+		fmt.Sprintf("ResearcherID.A-%s-%s-%s-%sX", randNumStr(2), randNumStr(2), randNumStr(2), randNumStr(2)),
+		fmt.Sprintf("ResearcherID|B-%s-%s", randNumStr(4), randNumStr(3)),
+		fmt.Sprintf("ResearcherID/F-%s-%s", randNumStr(3), randNumStr(4)),
+		fmt.Sprintf("ResearcherID:%s-%s", randNumStr(4), randNumStr(4)),
+	}
+
+	for _, id := range invalidRIDs {
+		ident := parseAuthorID(id)
+		if ident == nil {
+			t.Fatalf("Author ID parsing failed for %q", id)
+		}
+		if ident.Scheme != "" {
+			t.Fatalf("Invalid author ResearcherID produced valid response for %q: Detected scheme %q (should be empty)", id, ident.Scheme)
+		}
+		if ident.ID != id {
+			t.Fatalf("Invalid author ResearcherID produced invalid ID: %q", id)
+		}
+	}
+
+	other := []string{
+		"anything else",
+		// looks like ResearcherID without prefix
+		fmt.Sprintf("A-%s-%s", randNumStr(4), randNumStr(4)),
+		// looks like ORCID without prefix
+		fmt.Sprintf("%s-%s-%s-%s", randNumStr(4), randNumStr(4), randNumStr(4), randNumStr(4)),
+	}
+
+	for _, id := range other {
+		ident := parseAuthorID(id)
+		if ident == nil {
+			t.Fatalf("Author ID parsing failed for %q", id)
+		}
+		if ident.Scheme != "" {
+			t.Fatalf("Unknown author ID produced valid response for %q: Detected scheme %q (should be empty)", id, ident.Scheme)
+		}
+		if ident.ID != id {
+			t.Fatalf("Invalid author ID produced invalid ID: %q", id)
+		}
+	}
+
 }
