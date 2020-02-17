@@ -116,33 +116,36 @@ func NewDataCite() DataCite {
 	}
 }
 
-func (dc *DataCite) AddAuthor(author *Author) {
-	authorIDParts := strings.SplitN(author.ID, ":", 2)
-	var authorIDType, authorID string
-	if len(authorIDParts) == 2 {
-		authorIDType = strings.TrimSpace(authorIDParts[0])
-		authorID = strings.TrimSpace(authorIDParts[1])
-	} else {
-		// No colon, add to ID as is
-		authorID = author.ID
+func parseAuthorID(authorID string) *NameIdentifier {
+	if authorID == "" {
+		return nil
 	}
-	ident := NameIdentifier{ID: authorID, Scheme: authorIDType}
-	if strings.ToLower(authorIDType) == "orcid" {
-		ident.SchemeURI = "http://orcid.org"
-
-		// Check if it's a correct ORCID:
-		// Must be four blocks of four numbers separated by dash; last character can be X
+	lowerID := strings.ToLower(authorID)
+	if strings.HasPrefix(lowerID, "orcid") {
+		// four blocks of four numbers separated by dash; last character can be X
 		// https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
-		var re = regexp.MustCompile(`^([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]$`)
-		ident.Scheme = "ORCID"
-		if !re.Match([]byte(authorID)) {
-			// TODO: Warn about malformed ID somehow
-			// ident.Scheme += " (CHECK ID)"
+		var re = regexp.MustCompile(`([[:digit:]]{4}-){3}[[:digit:]]{3}[[:digit:]X]`)
+		if orcid := re.Find([]byte(authorID)); orcid != nil {
+			return &NameIdentifier{SchemeURI: "http://orcid.org/", Scheme: "ORCID", ID: string(orcid)}
+		}
+	} else if strings.HasPrefix(lowerID, "researcherid") {
+		// couldn't find official description of format, but it seems to be:
+		// letter, dash, four numbers, dash, four numbers
+		var re = regexp.MustCompile(`[[:alpha:]](-[[:digit:]]{4}){2}`)
+		if researcherid := re.Find([]byte(authorID)); researcherid != nil {
+			// TODO: Find the proper values for these (publons.com?)
+			return &NameIdentifier{SchemeURI: "publons.com", Scheme: "ResercherID", ID: string(researcherid)}
 		}
 	}
+	// unknown author ID type, or type identifier and format doesn't match regex: Return full string as ID
+	return &NameIdentifier{SchemeURI: "", Scheme: "", ID: string(authorID)}
+}
+
+func (dc *DataCite) AddAuthor(author *Author) {
+	ident := parseAuthorID(author.ID)
 	creator := Creator{
 		Name:        fmt.Sprintf("%s %s", author.FirstName, author.LastName),
-		Identifier:  &ident,
+		Identifier:  ident,
 		Affiliation: author.Affiliation,
 	}
 	dc.Creators = append(dc.Creators, creator)
