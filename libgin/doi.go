@@ -15,28 +15,34 @@ import (
 // through the datacite.yml file. This data is usually used to populate the
 // DataCite and RepositoryMetadata types.
 type RepositoryYAML struct {
-	Authors []struct {
-		FirstName   string `yaml:"firstname"`
-		LastName    string `yaml:"lastname"`
-		Affiliation string `yaml:"affiliation,omitempty"`
-		ID          string `yaml:"id,omitempty"`
-	}
-	Title       string `yaml:"title"`
-	Description string
-	Keywords    []string `yaml:"keywords"`
-	License     struct {
-		Name string `yaml:"name"`
-		URL  string `yaml:"url"`
-	}
-	Funding    []string `yaml:"funding,omitempty"`
-	References struct {
-		ID       string `yaml:"string"`
-		RefType  string `yaml:"reftype"`
-		Name     string `yaml:"name"`     // deprecated, but still read for older versions
-		Citation string `yaml:"citation"` // meant to replace Name
-	}
+	Authors         []Author
+	Title           string `yaml:"title"`
+	Description     string
+	Keywords        []string `yaml:"keywords"`
+	License         *License
+	Funding         []string `yaml:"funding,omitempty"`
+	References      []Reference
 	TemplateVersion string `yaml:"templateversion,omitempty"`
 	ResourceType    string `yaml:"resourcetype"`
+}
+
+type Author struct {
+	FirstName   string `yaml:"firstname"`
+	LastName    string `yaml:"lastname"`
+	Affiliation string `yaml:"affiliation,omitempty"`
+	ID          string `yaml:"id,omitempty"`
+}
+
+type License struct {
+	Name string `yaml:"name"`
+	URL  string `yaml:"url"`
+}
+
+type Reference struct {
+	ID       string `yaml:"string"`
+	RefType  string `yaml:"reftype"`
+	Name     string `yaml:"name"`     // deprecated, but still read for older versions
+	Citation string `yaml:"citation"` // meant to replace Name
 }
 
 type GINUser struct {
@@ -158,13 +164,6 @@ func (c *DOIRegInfo) PrettyDate() string {
 	return c.DateTime.Format("02 Jan. 2006")
 }
 
-type Author struct {
-	FirstName   string
-	LastName    string
-	Affiliation string
-	ID          string
-}
-
 func (c *Author) GetValidID() *NamedIdentifier {
 	if c.ID == "" {
 		return nil
@@ -188,13 +187,6 @@ type NamedIdentifier struct {
 	SchemeURI string
 	Scheme    string
 	ID        string
-}
-
-type Reference struct {
-	Reftype  string
-	Name     string
-	Citation string
-	ID       string
 }
 
 func (ref Reference) GetURL() string {
@@ -222,11 +214,6 @@ func (ref Reference) GetURL() string {
 	}
 
 	return fmt.Sprintf("%s%s", prefix, idnum)
-}
-
-type License struct {
-	Name string
-	URL  string
 }
 
 func IsRegisteredDOI(doi string) bool {

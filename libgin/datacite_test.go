@@ -25,9 +25,9 @@ func Test_DataCiteMarshal(t *testing.T) {
 	example.AddFunding("EU, EU.12345")
 	example.SetResourceType("Dataset")
 
-	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", Reftype: "IsDescribedBy", Name: "Manuscript title for reference."})
-	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", Reftype: "IsSupplementTo", Name: "Some other work"})
-	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", Reftype: "IsReferencedBy", Name: "A work that references this dataset."})
+	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", RefType: "IsDescribedBy", Name: "Manuscript title for reference."})
+	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", RefType: "IsSupplementTo", Name: "Some other work"})
+	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", RefType: "IsReferencedBy", Name: "A work that references this dataset."})
 
 	_, err := xml.MarshalIndent(example, "", "\t")
 	if err != nil {
@@ -59,21 +59,21 @@ func Test_DataCiteFromRegInfo(t *testing.T) {
 	references := []Reference{
 		Reference{
 			ID:      "doi:10.xxx/zzzz",
-			Reftype: "IsSupplementTo",
+			RefType: "IsSupplementTo",
 			Name:    "PublicationName1",
 		},
 		Reference{
 			ID:      "arxiv:mmmm.nnnn",
-			Reftype: "IsDescribedBy",
+			RefType: "IsDescribedBy",
 			Name:    "PublicationName2",
 		},
 		Reference{
 			ID:      "pmid:nnnnnnnn",
-			Reftype: "IsReferencedBy",
+			RefType: "IsReferencedBy",
 			Name:    "PublicationName3",
 		},
 	}
-	regInfo := &DOIRegInfo{
+	regInfo := &RepositoryYAML{
 		Authors:      authors,
 		Title:        "This is a sample",
 		Description:  "This is the abstract",
@@ -83,7 +83,7 @@ func Test_DataCiteFromRegInfo(t *testing.T) {
 		References:   references,
 		ResourceType: "Dataset",
 	}
-	example := NewDataCiteFromRegInfo(regInfo)
+	example := NewDataCiteFromYAML(regInfo)
 	dataciteXML, err := xml.MarshalIndent(example, "", "\t")
 	if err != nil {
 		t.Fatalf("Failed to marshal: %v\n", err)

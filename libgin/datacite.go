@@ -66,6 +66,7 @@ type ResourceType struct {
 	Value   string `xml:",chardata"`
 	General string `xml:"resourceTypeGeneral,attr"`
 }
+
 type DataCite struct {
 	XMLName        xml.Name `xml:"resource"`
 	Schema         string   `xml:"xmlns:xsi,attr"`
@@ -195,7 +196,7 @@ func (dc *DataCite) AddReference(ref *Reference) {
 		relID = ref.ID
 	}
 
-	relatedIdentifier := RelatedIdentifier{Identifier: relID, Type: relIDType, RelationType: ref.Reftype}
+	relatedIdentifier := RelatedIdentifier{Identifier: relID, Type: relIDType, RelationType: ref.RefType}
 	dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
 
 	// Add citation string as Description
@@ -209,26 +210,26 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	if !strings.HasSuffix(namecitation, ".") {
 		namecitation += "."
 	}
-	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s)", ref.Reftype, namecitation, ref.ID), Type: "Other"}
+	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s)", ref.RefType, namecitation, ref.ID), Type: "Other"}
 
 	dc.Descriptions = append(dc.Descriptions, refDesc)
 }
 
-func NewDataCiteFromRegInfo(regInfo *DOIRegInfo) *DataCite {
+func NewDataCiteFromYAML(info *RepositoryYAML) *DataCite {
 	datacite := NewDataCite()
-	for _, author := range regInfo.Authors {
+	for _, author := range info.Authors {
 		datacite.AddAuthor(&author)
 	}
-	datacite.Titles = []string{regInfo.Title}
-	datacite.AddAbstract(regInfo.Description)
-	datacite.Subjects = regInfo.Keywords
-	datacite.RightsList = []Rights{Rights{Name: regInfo.License.Name, URL: regInfo.License.URL}}
-	for _, funding := range regInfo.Funding {
+	datacite.Titles = []string{info.Title}
+	datacite.AddAbstract(info.Description)
+	datacite.Subjects = info.Keywords
+	datacite.RightsList = []Rights{Rights{Name: info.License.Name, URL: info.License.URL}}
+	for _, funding := range info.Funding {
 		datacite.AddFunding(funding)
 	}
-	for _, ref := range regInfo.References {
+	for _, ref := range info.References {
 		datacite.AddReference(&ref)
 	}
-	datacite.SetResourceType(regInfo.ResourceType)
+	datacite.SetResourceType(info.ResourceType)
 	return &datacite
 }
