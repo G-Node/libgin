@@ -71,12 +71,6 @@ type RepositoryMetadata struct {
 	DOI string
 	// UUID calculated from unique repository path or randomly assigned
 	UUID string
-	// URL to the registered dataset archive
-	ArchiveURL string
-	// URL to the landing page of the published dataset
-	PageURL string
-	// File size for the archive (in bytes)
-	ArchiveSize int
 	// Registration date (time can also be stored, but is not necessary)
 	DateTime time.Time
 }

@@ -94,6 +94,8 @@ type DataCite struct {
 	// Language: eng
 	Language     string       `xml:"language"`
 	ResourceType ResourceType `xml:"resourceType"`
+	// Size of the archive
+	Size string `xml:"size,omitempty"`
 	// Version: 1.0
 	Version string `xml:"version"`
 }
@@ -232,4 +234,29 @@ func NewDataCiteFromYAML(info *RepositoryYAML) *DataCite {
 	}
 	datacite.SetResourceType(info.ResourceType)
 	return &datacite
+}
+
+// AddURLs is a convenience function for appending three reference URLs:
+// 1. The source repository URL;
+// 2. The DOI fork repository URL;
+// 3. The Archive URL.
+// If the archive URL is valid and reachable, the Size of the archive is added
+// as well.
+func (dc *DataCite) AddURLs(repo, fork, archive string) {
+	if repo != "" {
+		relatedIdentifier := RelatedIdentifier{Identifier: repo, Type: "URL", RelationType: "IsSourceOf"}
+		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+	}
+	if fork != "" {
+		relatedIdentifier := RelatedIdentifier{Identifier: fork, Type: "URL", RelationType: "IsVariantFormOf"}
+		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+	}
+	if archive != "" {
+		relatedIdentifier := RelatedIdentifier{Identifier: archive, Type: "URL", RelationType: "IsDerivedFrom"}
+		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+		if size, err := getArchiveSize(archive); err == nil {
+			dc.Size = fmt.Sprintf("%d bytes", size) // keep it in bytes so we can humanize it whenever we need to
+		}
+		// ignore error and don't add size
+	}
 }
