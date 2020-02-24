@@ -260,3 +260,14 @@ func (dc *DataCite) AddURLs(repo, fork, archive string) {
 		// ignore error and don't add size
 	}
 }
+
+// Marshal returns the marshalled version of the metadata structure, indented
+// with tabs and with the appropriate XML header.
+func (dc *DataCite) Marshal() (string, error) {
+	dataciteXML, err := xml.MarshalIndent(dc, "", "\t")
+	if err != nil {
+		return "", err
+	}
+
+	return xml.Header + string(dataciteXML), nil
+}
