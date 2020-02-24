@@ -244,7 +244,7 @@ func NewDataCiteFromYAML(info *RepositoryYAML) *DataCite {
 // as well.
 func (dc *DataCite) AddURLs(repo, fork, archive string) {
 	if repo != "" {
-		relatedIdentifier := RelatedIdentifier{Identifier: repo, Type: "URL", RelationType: "IsSourceOf"}
+		relatedIdentifier := RelatedIdentifier{Identifier: repo, Type: "URL", RelationType: "IsVariantFormOf"}
 		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
 	}
 	if fork != "" {
@@ -252,7 +252,7 @@ func (dc *DataCite) AddURLs(repo, fork, archive string) {
 		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
 	}
 	if archive != "" {
-		relatedIdentifier := RelatedIdentifier{Identifier: archive, Type: "URL", RelationType: "IsDerivedFrom"}
+		relatedIdentifier := RelatedIdentifier{Identifier: archive, Type: "URL", RelationType: "IsVariantFormOf"}
 		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
 		if size, err := getArchiveSize(archive); err == nil {
 			dc.Size = fmt.Sprintf("%d bytes", size) // keep it in bytes so we can humanize it whenever we need to
