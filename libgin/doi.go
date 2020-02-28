@@ -39,7 +39,7 @@ type License struct {
 }
 
 type Reference struct {
-	ID       string `yaml:"string,omitempty"`
+	ID       string `yaml:"id,omitempty"`
 	RefType  string `yaml:"reftype,omitempty"`
 	Name     string `yaml:"name,omitempty"`     // deprecated, but still read for older versions
 	Citation string `yaml:"citation,omitempty"` // meant to replace Name
