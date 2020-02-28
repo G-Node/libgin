@@ -146,7 +146,7 @@ func parseAuthorID(authorID string) *NameIdentifier {
 		var re = regexp.MustCompile(`[[:alpha:]](-[[:digit:]]{4}){2}`)
 		if researcherid := re.Find([]byte(authorID)); researcherid != nil {
 			// TODO: Find the proper values for these (publons.com?)
-			return &NameIdentifier{SchemeURI: "publons.com", Scheme: "ResercherID", ID: string(researcherid)}
+			return &NameIdentifier{SchemeURI: "http://publons.com", Scheme: "ResercherID", ID: string(researcherid)}
 		}
 	}
 	// unknown author ID type, or type identifier and format doesn't match regex: Return full string as ID
@@ -200,7 +200,10 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	refIDParts := strings.SplitN(ref.ID, ":", 2)
 	var relIDType, relID string
 	if len(refIDParts) == 2 {
-		relIDType = relIDTypeMap[strings.ToLower(strings.TrimSpace(refIDParts[0]))]
+		relIDType := strings.TrimSpace(refIDParts[0])
+		if ridt, ok := relIDTypeMap[strings.ToLower(relIDType)]; ok {
+			relIDType = ridt
+		}
 		relID = strings.TrimSpace(refIDParts[1])
 	} else {
 		// No colon, add to ID as is

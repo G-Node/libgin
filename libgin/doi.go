@@ -59,7 +59,7 @@ type RepositoryMetadata struct {
 	// DataCite is the struct that produces the XML file
 	*DataCite
 	// The following are computed or generated from external info and don't
-	// show up in the YAML or XML files
+	// all show up in the YAML or XML files
 
 	// The user that sent the request
 	RequestingUser *GINUser
@@ -109,6 +109,7 @@ type DOIRequestData struct {
 }
 
 // DOIRegInfo holds all the metadata and information necessary for a DOI registration request.
+// Deprecated and obsolete: Marked for removal
 type DOIRegInfo struct {
 	Missing         []string
 	DOI             string
@@ -154,8 +155,8 @@ func (c *DOIRegInfo) ISODate() string {
 	return c.DateTime.Format("2006-01-02")
 }
 
-func (c *DOIRegInfo) PrettyDate() string {
-	return c.DateTime.Format("02 Jan. 2006")
+func PrettyDate(dt *time.Time) string {
+	return dt.Format("02 Jan. 2006")
 }
 
 func (c *Author) GetValidID() *NamedIdentifier {
