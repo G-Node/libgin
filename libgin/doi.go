@@ -15,15 +15,15 @@ import (
 // through the datacite.yml file. This data is usually used to populate the
 // DataCite and RepositoryMetadata types.
 type RepositoryYAML struct {
-	Authors         []Author
-	Title           string `yaml:"title"`
-	Description     string
-	Keywords        []string `yaml:"keywords"`
-	License         *License
-	Funding         []string `yaml:"funding,omitempty"`
-	References      []Reference
-	TemplateVersion string `yaml:"templateversion,omitempty"`
-	ResourceType    string `yaml:"resourcetype"`
+	Authors         []Author    `yaml:"authors"`
+	Title           string      `yaml:"title"`
+	Description     string      `yaml:"description"`
+	Keywords        []string    `yaml:"keywords"`
+	License         *License    `yaml:"license,omitempty"`
+	Funding         []string    `yaml:"funding,omitempty"`
+	References      []Reference `yaml:"references,omitempty"`
+	TemplateVersion string      `yaml:"templateversion,omitempty"`
+	ResourceType    string      `yaml:"resourcetype"`
 }
 
 type Author struct {
@@ -39,10 +39,10 @@ type License struct {
 }
 
 type Reference struct {
-	ID       string `yaml:"string"`
-	RefType  string `yaml:"reftype"`
-	Name     string `yaml:"name"`     // deprecated, but still read for older versions
-	Citation string `yaml:"citation"` // meant to replace Name
+	ID       string `yaml:"string,omitempty"`
+	RefType  string `yaml:"reftype,omitempty"`
+	Name     string `yaml:"name,omitempty"`     // deprecated, but still read for older versions
+	Citation string `yaml:"citation,omitempty"` // meant to replace Name
 }
 
 type GINUser struct {
