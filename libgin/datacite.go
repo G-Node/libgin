@@ -17,6 +17,15 @@ const (
 	Version        = "1.0"
 )
 
+// relIDTypeMap is used to fix the case of reference types coming from the
+// user's datacite.yml file.
+var relIDTypeMap = map[string]string{
+	"doi":   "DOI",
+	"url":   "URL",
+	"arxiv": "arXiv",
+	"pmid":  "PMID",
+}
+
 type NameIdentifier struct {
 	ID        string `xml:",chardata"`
 	SchemeURI string `xml:"schemeURI,attr"`
@@ -191,7 +200,7 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	refIDParts := strings.SplitN(ref.ID, ":", 2)
 	var relIDType, relID string
 	if len(refIDParts) == 2 {
-		relIDType = strings.TrimSpace(refIDParts[0])
+		relIDType = relIDTypeMap[strings.ToLower(strings.TrimSpace(refIDParts[0]))]
 		relID = strings.TrimSpace(refIDParts[1])
 	} else {
 		// No colon, add to ID as is
