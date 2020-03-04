@@ -200,7 +200,7 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	refIDParts := strings.SplitN(ref.ID, ":", 2)
 	var relIDType, relID string
 	if len(refIDParts) == 2 {
-		relIDType := strings.TrimSpace(refIDParts[0])
+		relIDType = strings.TrimSpace(refIDParts[0])
 		if ridt, ok := relIDTypeMap[strings.ToLower(relIDType)]; ok {
 			relIDType = ridt
 		}
