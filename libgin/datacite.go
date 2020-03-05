@@ -146,7 +146,7 @@ func parseAuthorID(authorID string) *NameIdentifier {
 		var re = regexp.MustCompile(`[[:alpha:]](-[[:digit:]]{4}){2}`)
 		if researcherid := re.Find([]byte(authorID)); researcherid != nil {
 			// TODO: Find the proper values for these (publons.com?)
-			return &NameIdentifier{SchemeURI: "http://publons.com", Scheme: "ResercherID", ID: string(researcherid)}
+			return &NameIdentifier{SchemeURI: "http://publons.com/researcher/", Scheme: "ResercherID", ID: string(researcherid)}
 		}
 	}
 	// unknown author ID type, or type identifier and format doesn't match regex: Return full string as ID
