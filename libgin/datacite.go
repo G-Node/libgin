@@ -156,7 +156,7 @@ func parseAuthorID(authorID string) *NameIdentifier {
 func (dc *DataCite) AddAuthor(author *Author) {
 	ident := parseAuthorID(author.ID)
 	creator := Creator{
-		Name:        fmt.Sprintf("%s %s", author.FirstName, author.LastName),
+		Name:        fmt.Sprintf("%s, %s", author.LastName, author.FirstName),
 		Identifier:  ident,
 		Affiliation: author.Affiliation,
 	}
