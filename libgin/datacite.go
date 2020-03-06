@@ -26,6 +26,11 @@ var relIDTypeMap = map[string]string{
 	"pmid":  "PMID",
 }
 
+type Identifier struct {
+	ID   string `xml:",chardata"`
+	Type string `xml:"identifierType,attr"`
+}
+
 type NameIdentifier struct {
 	ID        string `xml:",chardata"`
 	SchemeURI string `xml:"schemeURI,attr"`
@@ -81,6 +86,8 @@ type DataCite struct {
 	Schema         string   `xml:"xmlns:xsi,attr"`
 	Namespace      string   `xml:"xmlns,attr"`
 	SchemaLocation string   `xml:"xsi:schemaLocation,attr"`
+	// Resource identifier (DOI)
+	Identifier Identifier `xml:"identifier"`
 	// Creators: Authors
 	Creators     []Creator     `xml:"creators>creator"`
 	Titles       []string      `xml:"titles>title"`

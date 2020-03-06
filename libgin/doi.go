@@ -67,8 +67,6 @@ type RepositoryMetadata struct {
 	SourceRepository string
 	// Should be full repository path of the snapshot fork (doi/<rpeoname>)
 	ForkRepository string
-	// The calculated or assigned DOI
-	DOI string
 	// UUID calculated from unique repository path or randomly assigned
 	UUID string
 	// Registration date (time can also be stored, but is not necessary)
