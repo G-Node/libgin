@@ -25,9 +25,9 @@ func ReadConf(key string) string {
 	return value
 }
 
-// getArchiveSize returns the size of the archive at the given URL.
+// GetArchiveSize returns the size of the archive at the given URL.
 // If the URL is invalid or unreachable, an error is returned.
-func getArchiveSize(archiveURL string) (uint64, error) {
+func GetArchiveSize(archiveURL string) (uint64, error) {
 	resp, err := http.Get(archiveURL)
 	if err != nil {
 		return 0, fmt.Errorf("Request for archive %q failed: %s\n", archiveURL, err.Error())

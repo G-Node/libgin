@@ -273,7 +273,7 @@ func (dc *DataCite) AddURLs(repo, fork, archive string) {
 	if archive != "" {
 		relatedIdentifier := RelatedIdentifier{Identifier: archive, Type: "URL", RelationType: "IsVariantFormOf"}
 		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
-		if size, err := getArchiveSize(archive); err == nil {
+		if size, err := GetArchiveSize(archive); err == nil {
 			dc.Size = fmt.Sprintf("%d bytes", size) // keep it in bytes so we can humanize it whenever we need to
 		}
 		// ignore error and don't add size
