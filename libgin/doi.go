@@ -69,8 +69,6 @@ type RepositoryMetadata struct {
 	ForkRepository string
 	// UUID calculated from unique repository path or randomly assigned
 	UUID string
-	// Registration date (time can also be stored, but is not necessary)
-	DateTime time.Time
 }
 
 // NOTE: TEMPORARY COPIES FROM gin-doi
