@@ -25,9 +25,9 @@ func Test_DataCiteMarshal(t *testing.T) {
 	example.AddFunding("EU, EU.12345")
 	example.SetResourceType("Dataset")
 
-	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", Reftype: "IsDescribedBy", Name: "Manuscript title for reference."})
-	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", Reftype: "IsSupplementTo", Name: "Some other work"})
-	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", Reftype: "IsReferencedBy", Name: "A work that references this dataset."})
+	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", RefType: "IsDescribedBy", Name: "Manuscript title for reference."})
+	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", RefType: "IsSupplementTo", Name: "Some other work"})
+	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", RefType: "IsReferencedBy", Name: "A work that references this dataset."})
 
 	_, err := xml.MarshalIndent(example, "", "\t")
 	if err != nil {
@@ -59,21 +59,21 @@ func Test_DataCiteFromRegInfo(t *testing.T) {
 	references := []Reference{
 		Reference{
 			ID:      "doi:10.xxx/zzzz",
-			Reftype: "IsSupplementTo",
+			RefType: "IsSupplementTo",
 			Name:    "PublicationName1",
 		},
 		Reference{
 			ID:      "arxiv:mmmm.nnnn",
-			Reftype: "IsDescribedBy",
+			RefType: "IsDescribedBy",
 			Name:    "PublicationName2",
 		},
 		Reference{
 			ID:      "pmid:nnnnnnnn",
-			Reftype: "IsReferencedBy",
+			RefType: "IsReferencedBy",
 			Name:    "PublicationName3",
 		},
 	}
-	regInfo := &DOIRegInfo{
+	regInfo := &RepositoryYAML{
 		Authors:      authors,
 		Title:        "This is a sample",
 		Description:  "This is the abstract",
@@ -83,7 +83,7 @@ func Test_DataCiteFromRegInfo(t *testing.T) {
 		References:   references,
 		ResourceType: "Dataset",
 	}
-	example := NewDataCiteFromRegInfo(regInfo)
+	example := NewDataCiteFromYAML(regInfo)
 	dataciteXML, err := xml.MarshalIndent(example, "", "\t")
 	if err != nil {
 		t.Fatalf("Failed to marshal: %v\n", err)
@@ -248,4 +248,19 @@ func Test_parseAuthorID(t *testing.T) {
 		}
 	}
 
+}
+
+func Test_GetArchiveSize(t *testing.T) {
+	// URL is earliest archive with the new name format, so wont change.
+	// Older archives might be renamed to the new format soon.
+	const archiveURL = "https://doi.gin.g-node.org/10.12751/g-node.4bdb22/10.12751_g-node.4bdb22.zip"
+	const expSize = 1559190240
+	size, err := GetArchiveSize(archiveURL)
+	if err != nil {
+		t.Fatalf("Failed to retrieve archive size for %q: %v", archiveURL, err)
+	}
+
+	if size != expSize {
+		t.Fatalf("Incorrect archive size: %d (expected) != %d", expSize, size)
+	}
 }

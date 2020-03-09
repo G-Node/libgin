@@ -11,6 +11,66 @@ import (
 	"time"
 )
 
+// RepositoryYAML is used to read the information provided by a GIN user
+// through the datacite.yml file. This data is usually used to populate the
+// DataCite and RepositoryMetadata types.
+type RepositoryYAML struct {
+	Authors         []Author    `yaml:"authors"`
+	Title           string      `yaml:"title"`
+	Description     string      `yaml:"description"`
+	Keywords        []string    `yaml:"keywords"`
+	License         *License    `yaml:"license,omitempty"`
+	Funding         []string    `yaml:"funding,omitempty"`
+	References      []Reference `yaml:"references,omitempty"`
+	TemplateVersion string      `yaml:"templateversion,omitempty"`
+	ResourceType    string      `yaml:"resourcetype"`
+}
+
+type Author struct {
+	FirstName   string `yaml:"firstname"`
+	LastName    string `yaml:"lastname"`
+	Affiliation string `yaml:"affiliation,omitempty"`
+	ID          string `yaml:"id,omitempty"`
+}
+
+type License struct {
+	Name string `yaml:"name"`
+	URL  string `yaml:"url"`
+}
+
+type Reference struct {
+	ID       string `yaml:"id,omitempty"`
+	RefType  string `yaml:"reftype,omitempty"`
+	Name     string `yaml:"name,omitempty"`     // deprecated, but still read for older versions
+	Citation string `yaml:"citation,omitempty"` // meant to replace Name
+}
+
+type GINUser struct {
+	Username string
+	Email    string
+	RealName string
+}
+
+// RepositoryMetadata can contain all known metadata for a registered (or
+// to-be-registered) repository. To do this, it embeds the
+type RepositoryMetadata struct {
+	// YAMLData is the original data coming from the repository
+	YAMLData *RepositoryYAML
+	// DataCite is the struct that produces the XML file
+	*DataCite
+	// The following are computed or generated from external info and don't
+	// all show up in the YAML or XML files
+
+	// The user that sent the request
+	RequestingUser *GINUser
+	// Should be full repository path (<user>/<reponame>)
+	SourceRepository string
+	// Should be full repository path of the snapshot fork (doi/<rpeoname>)
+	ForkRepository string
+	// UUID calculated from unique repository path or randomly assigned
+	UUID string
+}
+
 // NOTE: TEMPORARY COPIES FROM gin-doi
 
 // UUIDMap is a map between registered repositories and their UUIDs for
@@ -45,6 +105,7 @@ type DOIRequestData struct {
 }
 
 // DOIRegInfo holds all the metadata and information necessary for a DOI registration request.
+// Deprecated and obsolete: Marked for removal
 type DOIRegInfo struct {
 	Missing         []string
 	DOI             string
@@ -90,15 +151,8 @@ func (c *DOIRegInfo) ISODate() string {
 	return c.DateTime.Format("2006-01-02")
 }
 
-func (c *DOIRegInfo) PrettyDate() string {
-	return c.DateTime.Format("02 Jan. 2006")
-}
-
-type Author struct {
-	FirstName   string
-	LastName    string
-	Affiliation string
-	ID          string
+func PrettyDate(dt *time.Time) string {
+	return dt.Format("02 Jan. 2006")
 }
 
 func (c *Author) GetValidID() *NamedIdentifier {
@@ -126,13 +180,6 @@ type NamedIdentifier struct {
 	ID        string
 }
 
-type Reference struct {
-	Reftype  string
-	Name     string
-	Citation string
-	ID       string
-}
-
 func (ref Reference) GetURL() string {
 	idparts := strings.SplitN(ref.ID, ":", 2)
 	if len(idparts) != 2 {
@@ -158,11 +205,6 @@ func (ref Reference) GetURL() string {
 	}
 
 	return fmt.Sprintf("%s%s", prefix, idnum)
-}
-
-type License struct {
-	Name string
-	URL  string
 }
 
 func IsRegisteredDOI(doi string) bool {

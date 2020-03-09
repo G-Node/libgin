@@ -17,6 +17,20 @@ const (
 	Version        = "1.0"
 )
 
+// relIDTypeMap is used to fix the case of reference types coming from the
+// user's datacite.yml file.
+var relIDTypeMap = map[string]string{
+	"doi":   "DOI",
+	"url":   "URL",
+	"arxiv": "arXiv",
+	"pmid":  "PMID",
+}
+
+type Identifier struct {
+	ID   string `xml:",chardata"`
+	Type string `xml:"identifierType,attr"`
+}
+
 type NameIdentifier struct {
 	ID        string `xml:",chardata"`
 	SchemeURI string `xml:"schemeURI,attr"`
@@ -66,11 +80,14 @@ type ResourceType struct {
 	Value   string `xml:",chardata"`
 	General string `xml:"resourceTypeGeneral,attr"`
 }
+
 type DataCite struct {
 	XMLName        xml.Name `xml:"resource"`
 	Schema         string   `xml:"xmlns:xsi,attr"`
 	Namespace      string   `xml:"xmlns,attr"`
 	SchemaLocation string   `xml:"xsi:schemaLocation,attr"`
+	// Resource identifier (DOI)
+	Identifier Identifier `xml:"identifier"`
 	// Creators: Authors
 	Creators     []Creator     `xml:"creators>creator"`
 	Titles       []string      `xml:"titles>title"`
@@ -93,6 +110,8 @@ type DataCite struct {
 	// Language: eng
 	Language     string       `xml:"language"`
 	ResourceType ResourceType `xml:"resourceType"`
+	// Size of the archive
+	Size string `xml:"size,omitempty"`
 	// Version: 1.0
 	Version string `xml:"version"`
 }
@@ -134,7 +153,7 @@ func parseAuthorID(authorID string) *NameIdentifier {
 		var re = regexp.MustCompile(`[[:alpha:]](-[[:digit:]]{4}){2}`)
 		if researcherid := re.Find([]byte(authorID)); researcherid != nil {
 			// TODO: Find the proper values for these (publons.com?)
-			return &NameIdentifier{SchemeURI: "publons.com", Scheme: "ResercherID", ID: string(researcherid)}
+			return &NameIdentifier{SchemeURI: "http://publons.com/researcher/", Scheme: "ResercherID", ID: string(researcherid)}
 		}
 	}
 	// unknown author ID type, or type identifier and format doesn't match regex: Return full string as ID
@@ -144,7 +163,7 @@ func parseAuthorID(authorID string) *NameIdentifier {
 func (dc *DataCite) AddAuthor(author *Author) {
 	ident := parseAuthorID(author.ID)
 	creator := Creator{
-		Name:        fmt.Sprintf("%s %s", author.FirstName, author.LastName),
+		Name:        fmt.Sprintf("%s, %s", author.LastName, author.FirstName),
 		Identifier:  ident,
 		Affiliation: author.Affiliation,
 	}
@@ -189,13 +208,16 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	var relIDType, relID string
 	if len(refIDParts) == 2 {
 		relIDType = strings.TrimSpace(refIDParts[0])
+		if ridt, ok := relIDTypeMap[strings.ToLower(relIDType)]; ok {
+			relIDType = ridt
+		}
 		relID = strings.TrimSpace(refIDParts[1])
 	} else {
 		// No colon, add to ID as is
 		relID = ref.ID
 	}
 
-	relatedIdentifier := RelatedIdentifier{Identifier: relID, Type: relIDType, RelationType: ref.Reftype}
+	relatedIdentifier := RelatedIdentifier{Identifier: relID, Type: relIDType, RelationType: ref.RefType}
 	dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
 
 	// Add citation string as Description
@@ -209,26 +231,62 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	if !strings.HasSuffix(namecitation, ".") {
 		namecitation += "."
 	}
-	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s)", ref.Reftype, namecitation, ref.ID), Type: "Other"}
+	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s)", ref.RefType, namecitation, ref.ID), Type: "Other"}
 
 	dc.Descriptions = append(dc.Descriptions, refDesc)
 }
 
-func NewDataCiteFromRegInfo(regInfo *DOIRegInfo) *DataCite {
+func NewDataCiteFromYAML(info *RepositoryYAML) *DataCite {
 	datacite := NewDataCite()
-	for _, author := range regInfo.Authors {
+	for _, author := range info.Authors {
 		datacite.AddAuthor(&author)
 	}
-	datacite.Titles = []string{regInfo.Title}
-	datacite.AddAbstract(regInfo.Description)
-	datacite.Subjects = regInfo.Keywords
-	datacite.RightsList = []Rights{Rights{Name: regInfo.License.Name, URL: regInfo.License.URL}}
-	for _, funding := range regInfo.Funding {
+	datacite.Titles = []string{info.Title}
+	datacite.AddAbstract(info.Description)
+	datacite.Subjects = info.Keywords
+	datacite.RightsList = []Rights{Rights{Name: info.License.Name, URL: info.License.URL}}
+	for _, funding := range info.Funding {
 		datacite.AddFunding(funding)
 	}
-	for _, ref := range regInfo.References {
+	for _, ref := range info.References {
 		datacite.AddReference(&ref)
 	}
-	datacite.SetResourceType(regInfo.ResourceType)
+	datacite.SetResourceType(info.ResourceType)
 	return &datacite
+}
+
+// AddURLs is a convenience function for appending three reference URLs:
+// 1. The source repository URL;
+// 2. The DOI fork repository URL;
+// 3. The Archive URL.
+// If the archive URL is valid and reachable, the Size of the archive is added
+// as well.
+func (dc *DataCite) AddURLs(repo, fork, archive string) {
+	if repo != "" {
+		relatedIdentifier := RelatedIdentifier{Identifier: repo, Type: "URL", RelationType: "IsVariantFormOf"}
+		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+	}
+	if fork != "" {
+		relatedIdentifier := RelatedIdentifier{Identifier: fork, Type: "URL", RelationType: "IsVariantFormOf"}
+		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+	}
+	if archive != "" {
+		relatedIdentifier := RelatedIdentifier{Identifier: archive, Type: "URL", RelationType: "IsVariantFormOf"}
+		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+		if size, err := GetArchiveSize(archive); err == nil {
+			dc.Size = fmt.Sprintf("%d bytes", size) // keep it in bytes so we can humanize it whenever we need to
+		}
+		// ignore error and don't add size
+	}
+}
+
+// Marshal returns the marshalled version of the metadata structure, indented
+// with tabs and with the appropriate XML header.
+func (dc *DataCite) Marshal() (string, error) {
+	dataciteXML, err := xml.MarshalIndent(dc, "", "\t")
+	if err != nil {
+		return "", err
+	}
+
+	return xml.Header + string(dataciteXML), nil
 }
