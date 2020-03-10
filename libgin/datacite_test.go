@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"strings"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -311,27 +311,7 @@ func Test_MarshalUnmarshal(t *testing.T) {
 		t.Fatalf("Failed to read XML file: %v", err.Error())
 	}
 
-	// marshal again and compare line by line
-	rdata, err := exampleRead.Marshal()
-	if err != nil {
-		t.Fatalf("Failed to marshal read data: %v", err.Error())
-	}
-
-	if len(wdata) != len(rdata) {
-		t.Fatalf("Written and read data have different length: %d != %d", len(wdata), len(rdata))
-	}
-
-	wdataLines := strings.Split(wdata, "\n")
-	rdataLines := strings.Split(rdata, "\n")
-
-	if len(wdataLines) != len(rdataLines) {
-		t.Fatalf("Written and read data have different number of lines: %d != %d", len(wdataLines), len(rdataLines))
-	}
-
-	for idx, rline := range rdataLines {
-		wline := wdataLines[idx]
-		if wline != rline {
-			t.Fatalf("Mismatched line at %d: %s != %s", idx, wline, rline)
-		}
+	if !reflect.DeepEqual(example, *exampleRead) {
+		t.Fatalf("Original data does not match reread data")
 	}
 }
