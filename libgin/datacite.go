@@ -3,6 +3,8 @@ package libgin
 import (
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -10,7 +12,6 @@ import (
 
 const (
 	Schema         = "http://www.w3.org/2001/XMLSchema-instance"
-	Namespace      = "http://datacite.org/schema/kernel-4"
 	SchemaLocation = "http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd"
 	Publisher      = "G-Node"
 	Language       = "eng"
@@ -82,9 +83,8 @@ type ResourceType struct {
 }
 
 type DataCite struct {
-	XMLName        xml.Name `xml:"resource"`
+	XMLName        xml.Name `xml:"http://datacite.org/schema/kernel-4 resource"`
 	Schema         string   `xml:"xmlns:xsi,attr"`
-	Namespace      string   `xml:"xmlns,attr"`
 	SchemaLocation string   `xml:"xsi:schemaLocation,attr"`
 	// Resource identifier (DOI)
 	Identifier Identifier `xml:"identifier"`
@@ -123,8 +123,8 @@ type DataCite struct {
 // changed when working with an existing publication.
 func NewDataCite() DataCite {
 	return DataCite{
+		XMLName:        xml.Name{Space: "http://datacite.org/schema/kernel-4", Local: "resource"},
 		Schema:         Schema,
-		Namespace:      Namespace,
 		SchemaLocation: SchemaLocation,
 		Contributors:   []Contributor{Contributor{"German Neuroinformatics Node", "HostingInstitution"}},
 		Publisher:      Publisher,
@@ -158,6 +158,15 @@ func parseAuthorID(authorID string) *NameIdentifier {
 	}
 	// unknown author ID type, or type identifier and format doesn't match regex: Return full string as ID
 	return &NameIdentifier{SchemeURI: "", Scheme: "", ID: string(authorID)}
+}
+
+// FixSchemaAttrs adds the Schema and SchemaLocation attributes that can't be
+// read from existing files when Unmarshaling.  See
+// https://github.com/golang/go/issues/9519 for the issue with attributes that
+// have a namespace prefix.
+func (dc *DataCite) FixSchemaAttrs() {
+	dc.Schema = Schema
+	dc.SchemaLocation = SchemaLocation
 }
 
 func (dc *DataCite) AddAuthor(author *Author) {
@@ -253,6 +262,30 @@ func NewDataCiteFromYAML(info *RepositoryYAML) *DataCite {
 	}
 	datacite.SetResourceType(info.ResourceType)
 	return &datacite
+}
+
+// UnmarshalFile reads an XML file specified by the given path and returns a
+// populated DataCite struct.  Before returning, it adds the schema attributes
+// for the top-level tag.  See also FixSchemaAttrs.
+func UnmarshalFile(path string) (*DataCite, error) {
+	fp, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer fp.Close()
+
+	xmldata, err := ioutil.ReadAll(fp)
+	if err != nil {
+		return nil, err
+	}
+	dc := new(DataCite)
+	err = xml.Unmarshal(xmldata, dc)
+
+	if err != nil {
+		return nil, err
+	}
+	dc.FixSchemaAttrs()
+	return dc, nil
 }
 
 // AddURLs is a convenience function for appending three reference URLs:

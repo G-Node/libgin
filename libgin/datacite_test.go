@@ -3,8 +3,12 @@ package libgin
 import (
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -257,10 +261,57 @@ func Test_GetArchiveSize(t *testing.T) {
 	const expSize = 1559190240
 	size, err := GetArchiveSize(archiveURL)
 	if err != nil {
-		t.Fatalf("Failed to retrieve archive size for %q: %v", archiveURL, err)
+		t.Fatalf("Failed to retrieve archive size for %q: %v", archiveURL, err.Error())
 	}
 
 	if size != expSize {
 		t.Fatalf("Incorrect archive size: %d (expected) != %d", expSize, size)
+	}
+}
+
+func Test_MarshalUnmarshal(t *testing.T) {
+	example := NewDataCite()
+	example.Creators = []Creator{
+		Creator{"Achilleas", &NameIdentifier{"0010", "http://orcid.org", "ORCID"}, "University of Bob"},
+		Creator{"Bob", &NameIdentifier{"1111", "http://orcid.org", "ORCID"}, "University of University"},
+		Creator{"Orphan", nil, ""},
+	}
+
+	example.Titles = []string{"This is a sample"}
+	example.AddAbstract("This is the abstract")
+	example.RightsList = []Rights{Rights{"CC-BY", "http://creativecommons.org/licenses/by/4.0/"}}
+	example.Subjects = []string{"One", "Two", "Three"}
+	example.AddFunding("DFG, DFG.12345")
+	example.AddFunding("EU, EU.12345")
+	example.SetResourceType("Dataset")
+
+	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", RefType: "IsDescribedBy", Name: "Manuscript title for reference."})
+	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", RefType: "IsSupplementTo", Name: "Some other work"})
+	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", RefType: "IsReferencedBy", Name: "A work that references this dataset."})
+
+	wdata, err := example.Marshal()
+	if err != nil {
+		t.Fatalf("Failed to marshal example data: %v", err.Error())
+	}
+
+	// Write data to temporary file and use UnmarshalFile() convenience function
+	tmpdir, err := ioutil.TempDir("", "datacite-test")
+	if err != nil {
+		t.Fatalf("Failed to create temporary directory: %v", err.Error())
+	}
+	defer os.RemoveAll(tmpdir)
+	fname := filepath.Join(tmpdir, "datacite.xml")
+	err = ioutil.WriteFile(fname, []byte(wdata), os.ModePerm)
+	if err != nil {
+		t.Fatalf("Failed to write marshalled data: %v", err.Error())
+	}
+
+	exampleRead, err := UnmarshalFile(fname)
+	if err != nil {
+		t.Fatalf("Failed to read XML file: %v", err.Error())
+	}
+
+	if !reflect.DeepEqual(example, *exampleRead) {
+		t.Fatalf("Original data does not match reread data")
 	}
 }
