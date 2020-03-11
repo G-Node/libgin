@@ -272,6 +272,7 @@ func UnmarshalFile(path string) (*DataCite, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer fp.Close()
 
 	xmldata, err := ioutil.ReadAll(fp)
 	if err != nil {
