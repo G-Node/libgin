@@ -316,7 +316,7 @@ func (dc *DataCite) AddURLs(repo, fork, archive string) {
 // Marshal returns the marshalled version of the metadata structure, indented
 // with tabs and with the appropriate XML header.
 func (dc *DataCite) Marshal() (string, error) {
-	dataciteXML, err := xml.MarshalIndent(dc, "", "\t")
+	dataciteXML, err := xml.MarshalIndent(dc, "", "  ")
 	if err != nil {
 		return "", err
 	}
