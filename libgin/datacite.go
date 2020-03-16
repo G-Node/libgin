@@ -27,6 +27,32 @@ var relIDTypeMap = map[string]string{
 	"pmid":  "PMID",
 }
 
+// funderIDMap maps known funder names to their ID (DOI).
+// This is currently populated from the existing registered datasets.
+// A more comprehensive list may be added later.
+var funderIDMap = map[string]string{
+	"BMBF":                       "https://doi.org/10.13039/501100002347",
+	"Boehringer Ingelheim Fonds": "https://doi.org/10.13039/501100001645",
+	"CNRS":                       "https://doi.org/10.13039/501100004794",
+	"DAAD":                       "https://doi.org/10.13039/501100001655",
+	"DFG":                        "https://doi.org/10.13039/501100001659",
+	"Einstein Foundation Berlin": "https://doi.org/10.13039/501100006188",
+	"Einstein Stiftung":          "https://doi.org/10.13039/501100006188",
+	"EU":                         "https://doi.org/10.13039/100010664",
+	"European Union’s Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreements No. 720270 and No. 785907 (Human Brain Project SGA1 and SGA2; to M.M. and P.A.)": "https://doi.org/10.13039/100010661",
+	"European Union's Seventh Framework Programme (FP/2007-2013)": "https://doi.org/10.13039/100011102",
+	"Helmholtz Association":           "https://doi.org/10.13039/501100001656",
+	"Human Frontiers Science Program": "https://doi.org/10.13039/501100000854",
+	"Innovate UK":                     "https://dx.doi.org/10.13039/501100006041",
+	"Max Planck Society":              "https://doi.org/10.13039/501100004189",
+	"Ministry of Science, Research, and the Arts of the State of Baden-Württemberg (MWK), Juniorprofessor programme": "https://doi.org/10.13039/501100003542",
+	"National Institute on Deafness and Other Communication Disorders":                                               "https://doi.org/10.13039/100000055",
+	"NIH": "https://doi.org/10.13039/100000002",
+	"NSF": "https://doi.org/10.13039/100000001",
+	"Seventh Framework Programme (European Union Seventh Framework Programme)": "https://doi.org/10.13039/100011102",
+	"The JPB Foundation": "https://doi.org/10.13039/100007457",
+}
+
 type Identifier struct {
 	ID   string `xml:",chardata"`
 	Type string `xml:"identifierType,attr"`
@@ -60,10 +86,15 @@ type RelatedIdentifier struct {
 	RelationType string `xml:"relationType,attr"`
 }
 
+type FunderIdentifier struct {
+	ID   string `xml:",chardata"`
+	Type string `xml:"funderIdentifierType,attr"`
+}
+
 type FundingReference struct {
-	Funder      string `xml:"funderName"`
-	AwardNumber string `xml:"awardNumber"`
-	// TODO: Add identifier for known funders
+	Funder      string            `xml:"funderName"`
+	AwardNumber string            `xml:"awardNumber"`
+	Identifier  *FunderIdentifier `xml:"funderIdentifier"`
 }
 
 type Contributor struct {
@@ -204,6 +235,9 @@ func (dc *DataCite) AddFunding(fundstr string) {
 		awardNumber = fundstr
 	}
 	fundref := FundingReference{Funder: funder, AwardNumber: awardNumber}
+	if id, known := funderIDMap[funder]; known {
+		fundref.Identifier = &FunderIdentifier{ID: id, Type: "Crossref Funder ID"}
+	}
 	dc.FundingReferences = append(dc.FundingReferences, fundref)
 }
 
