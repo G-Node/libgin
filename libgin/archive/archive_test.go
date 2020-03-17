@@ -191,7 +191,7 @@ func extractTestRepo() (*git.Repository, error) {
 		return nil, err
 	}
 
-	return git.OpenRepository(temprepo)
+	return git.Open(temprepo)
 }
 
 func TestZip(t *testing.T) {
@@ -200,9 +200,9 @@ func TestZip(t *testing.T) {
 		t.Fatalf("failed to extract test repository: %s", err.Error())
 	}
 
-	defer os.RemoveAll(repo.Path)
+	defer os.RemoveAll(repo.Path())
 
-	master, err := repo.GetCommit("master")
+	master, err := repo.CatFileCommit("master")
 	if err != nil {
 		t.Fatalf("failed to get master branch: %s", err.Error())
 	}
@@ -238,9 +238,9 @@ func TestTar(t *testing.T) {
 		t.Fatalf("failed to extract test repository: %s", err.Error())
 	}
 
-	defer os.RemoveAll(repo.Path)
+	defer os.RemoveAll(repo.Path())
 
-	master, err := repo.GetCommit("master")
+	master, err := repo.CatFileCommit("master")
 	if err != nil {
 		t.Fatalf("failed to get master branch: %s", err.Error())
 	}
