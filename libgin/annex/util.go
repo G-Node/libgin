@@ -17,7 +17,7 @@ const annexDirLetters = "0123456789zqjxkmvwgpfZQJXKMVWGPF"
 func IsAnnexFile(blob *git.Blob) bool {
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
-	blob.DataPipeline(stdout, stderr)
+	blob.Pipeline(stdout, stderr)
 	reader := bufio.NewReader(stdout)
 
 	// Contents differ if the file is locked (symlink) or unlocked (plain text blob)
@@ -28,7 +28,7 @@ func IsAnnexFile(blob *git.Blob) bool {
 	// 1. The file might be very large
 	// 2. The file might contain the string for other reasons (e.g., documentation, or this file)
 
-	if blob.IsLink() {
+	if blob.IsSymlink() {
 		// read the entire contents and check if it's a path inside .git/annex/objects
 		readbuf := make([]byte, reader.Size())
 		_, err := reader.Read(readbuf)
@@ -48,14 +48,14 @@ func IsAnnexFile(blob *git.Blob) bool {
 	return string(readbuf) == ident
 }
 
-func Upgrade(dir string) (string, error) {
+func Upgrade(dir string) ([]byte, error) {
 	cmd := git.NewCommand("annex", "upgrade")
 	return cmd.RunInDir(dir)
 }
 
 func IsBare(repo *git.Repository) (bool, error) {
-	out, err := git.NewCommand("config", "core.bare").RunInDir(repo.Path)
-	out = strings.TrimSpace(out)
+	outb, err := git.NewCommand("config", "core.bare").RunInDir(repo.Path())
+	out := string(bytes.TrimSpace(outb))
 	if err != nil {
 		return false, err
 	}
@@ -71,7 +71,7 @@ func IsBare(repo *git.Repository) (bool, error) {
 // ContentLocation returns the location of the content file for a given annex key.
 // The returned path is relative to the repository git directory.
 func ContentLocation(repo *git.Repository, key string) (string, error) {
-	gitdir := repo.Path
+	gitdir := repo.Path()
 	if bare, err := IsBare(repo); err != nil {
 		return "", err
 	} else if !bare {

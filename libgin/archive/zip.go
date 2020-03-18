@@ -25,7 +25,7 @@ func NewZipWriter(repo *git.Repository, commit *git.Commit) *ZipWriter {
 }
 
 func (a *ZipWriter) Write(target string) error {
-	tree := &a.Commit.Tree
+	tree := a.Commit.Tree
 
 	zipfile, err := os.Create(target)
 	if err != nil {
@@ -42,7 +42,7 @@ func (a *ZipWriter) Write(target string) error {
 func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 	var filemode os.FileMode
 	filemode |= 0660
-	if blob.IsLink() {
+	if blob.IsSymlink() {
 		filemode |= os.ModeSymlink
 	}
 	header := zip.FileHeader{
@@ -52,7 +52,7 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
-	blob.DataPipeline(stdout, stderr)
+	blob.Pipeline(stdout, stderr)
 	reader := bufio.NewReader(stdout)
 	readbuf := make([]byte, 10240)
 	if annex.IsAnnexFile(blob) {
@@ -67,7 +67,7 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 		if err != nil {
 			return fmt.Errorf("content file not found: %q", annexkey)
 		}
-		loc = filepath.Join(a.Repository.Path, loc)
+		loc = filepath.Join(a.Repository.Path(), loc)
 		rc, err := os.Open(loc)
 		if err != nil {
 			return fmt.Errorf("failed to open content file: %s", err.Error())
@@ -89,14 +89,14 @@ func (a *ZipWriter) addBlob(blob *git.Blob, fname string) error {
 }
 
 func (a *ZipWriter) addTree(tree *git.Tree, parent string) error {
-	entries, _ := tree.ListEntries()
+	entries, _ := tree.Entries()
 	for _, te := range entries {
 		path := filepath.Join(parent, te.Name())
-		if te.IsDir() {
+		if te.IsTree() {
 			if _, err := a.writer.Create(path + "/"); err != nil {
 				return err
 			}
-			subtree, _ := tree.SubTree(te.Name())
+			subtree, _ := tree.Subtree(te.Name())
 			if err := a.addTree(subtree, path); err != nil {
 				return err
 			}

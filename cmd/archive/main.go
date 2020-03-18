@@ -49,13 +49,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	repo, err := git.OpenRepository(path)
+	repo, err := git.Open(path)
 	if err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	master, err := repo.GetCommit("master")
+	master, err := repo.CatFileCommit("master")
 	if err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		os.Exit(1)

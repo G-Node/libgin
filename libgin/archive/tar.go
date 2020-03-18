@@ -27,7 +27,7 @@ func NewTarWriter(repo *git.Repository, commit *git.Commit) *TarWriter {
 }
 
 func (a *TarWriter) Write(target string) error {
-	tree := &a.Commit.Tree
+	tree := a.Commit.Tree
 
 	gzipfile, err := os.Create(target)
 	if err != nil {
@@ -50,14 +50,14 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 	}
 	var filemode os.FileMode
 	filemode |= 0660
-	if blob.IsLink() {
+	if blob.IsSymlink() {
 		filemode |= os.ModeSymlink
 	}
 	blob.Blob()
 
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
-	blob.DataPipeline(stdout, stderr)
+	blob.Pipeline(stdout, stderr)
 	size := blob.Size()
 	reader := bufio.NewReader(stdout)
 	readbuf := make([]byte, 10240)
@@ -74,7 +74,7 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 			return fmt.Errorf("content file not found: %q", annexkey)
 		}
 
-		loc = filepath.Join(a.Repository.Path, loc)
+		loc = filepath.Join(a.Repository.Path(), loc)
 		rc, err := os.Open(loc)
 		if err != nil {
 			return fmt.Errorf("failed to open content file: %s", err.Error())
@@ -108,10 +108,10 @@ func (a *TarWriter) addBlob(blob *git.Blob, fname string) error {
 }
 
 func (a *TarWriter) addTree(tree *git.Tree, path string) error {
-	entries, _ := tree.ListEntries()
+	entries, _ := tree.Entries()
 	for _, te := range entries {
 		path := filepath.Join(path, te.Name())
-		if te.IsDir() {
+		if te.IsTree() {
 			header := tar.Header{
 				Name:     path + "/",
 				ModTime:  time.Now(), // TODO: use commit time
@@ -121,7 +121,7 @@ func (a *TarWriter) addTree(tree *git.Tree, path string) error {
 			if err := a.writer.WriteHeader(&header); err != nil {
 				return err
 			}
-			subtree, _ := tree.SubTree(te.Name())
+			subtree, _ := tree.Subtree(te.Name())
 			if err := a.addTree(subtree, path); err != nil {
 				return err
 			}
