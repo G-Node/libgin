@@ -199,6 +199,9 @@ func (ref Reference) GetURL() string {
 	case "pmid":
 		// https://www.ncbi.nlm.nih.gov/books/NBK3862/#linkshelp.Retrieve_PubMed_Citations
 		prefix = "https://www.ncbi.nlm.nih.gov/pubmed/"
+	case "url":
+		// simple URL: no prefix
+		prefix = ""
 	default:
 		// Return an empty string to make the reflink inactive
 		return ""
