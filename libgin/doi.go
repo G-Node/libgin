@@ -140,7 +140,7 @@ func (c *DOIRegInfo) GetCitation() string {
 			authors += fmt.Sprintf("%s, ", auth.LastName)
 		}
 	}
-	return fmt.Sprintf("%s (%s) %s. G-Node. doi:%s", authors, c.Year(), c.Title, c.DOI)
+	return fmt.Sprintf("%s (%s) %s. G-Node. https://doi.org/%s", authors, c.Year(), c.Title, c.DOI)
 }
 
 func (c *DOIRegInfo) Year() string {

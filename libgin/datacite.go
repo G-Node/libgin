@@ -274,7 +274,7 @@ func (dc *DataCite) AddReference(ref *Reference) {
 	if !strings.HasSuffix(namecitation, ".") {
 		namecitation += "."
 	}
-	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s:%s)", ref.RefType, namecitation, relIDType, relID), Type: "Other"}
+	refDesc := Description{Content: fmt.Sprintf("%s: %s (%s)", ref.RefType, namecitation, ref.GetURL()), Type: "Other"}
 
 	dc.Descriptions = append(dc.Descriptions, refDesc)
 }
