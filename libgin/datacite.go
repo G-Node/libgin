@@ -126,10 +126,10 @@ type DataCite struct {
 	// RightsList: Licenses
 	RightsList []Rights `xml:"rightsList>rights"`
 	// Subjects: Keywords
-	Subjects []string `xml:"subjects>subject,omitempty"`
+	Subjects *[]string `xml:"subjects>subject,omitempty"`
 	// RelatedIdentifiers: References
-	RelatedIdentifiers []RelatedIdentifier `xml:"relatedIdentifiers>relatedIdentifier,omitempty"`
-	FundingReferences  []FundingReference  `xml:"fundingReferences>fundingReference,omitempty"`
+	RelatedIdentifiers []RelatedIdentifier `xml:"relatedIdentifiers>relatedIdentifier"`
+	FundingReferences  *[]FundingReference `xml:"fundingReferences>fundingReference,omitempty"`
 	// Contributors: Always German Neuroinformatics Node with type "HostingInstitution"
 	Contributors []Contributor `xml:"contributors>contributor"`
 	// Publisher: Always G-Node
@@ -142,7 +142,7 @@ type DataCite struct {
 	Language     string       `xml:"language"`
 	ResourceType ResourceType `xml:"resourceType"`
 	// Size of the archive
-	Sizes []string `xml:"sizes>size,omitempty"`
+	Sizes *[]string `xml:"sizes>size,omitempty"`
 	// Version: 1.0
 	Version string `xml:"version"`
 }
@@ -238,7 +238,10 @@ func (dc *DataCite) AddFunding(fundstr string) {
 	if id, known := funderIDMap[funder]; known {
 		fundref.Identifier = &FunderIdentifier{ID: id, Type: "Crossref Funder ID"}
 	}
-	dc.FundingReferences = append(dc.FundingReferences, fundref)
+	if dc.FundingReferences == nil {
+		dc.FundingReferences = &[]FundingReference{}
+	}
+	*dc.FundingReferences = append(*dc.FundingReferences, fundref)
 }
 
 // AddReference is a convenience function for appending a RelatedIdentifier
@@ -286,7 +289,7 @@ func NewDataCiteFromYAML(info *RepositoryYAML) *DataCite {
 	}
 	datacite.Titles = []string{info.Title}
 	datacite.AddAbstract(info.Description)
-	datacite.Subjects = info.Keywords
+	datacite.Subjects = &info.Keywords
 	datacite.RightsList = []Rights{Rights{Name: info.License.Name, URL: info.License.URL}}
 	for _, funding := range info.Funding {
 		datacite.AddFunding(funding)
@@ -341,7 +344,7 @@ func (dc *DataCite) AddURLs(repo, fork, archive string) {
 		relatedIdentifier := RelatedIdentifier{Identifier: archive, Type: "URL", RelationType: "IsVariantFormOf"}
 		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
 		if size, err := GetArchiveSize(archive); err == nil {
-			dc.Sizes = []string{fmt.Sprintf("%d bytes", size)} // keep it in bytes so we can humanize it whenever we need to
+			dc.Sizes = &[]string{fmt.Sprintf("%d bytes", size)} // keep it in bytes so we can humanize it whenever we need to
 		}
 		// ignore error and don't add size
 	}
