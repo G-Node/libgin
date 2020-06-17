@@ -12,7 +12,7 @@ import (
 
 const (
 	Schema         = "http://www.w3.org/2001/XMLSchema-instance"
-	SchemaLocation = "http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd"
+	SchemaLocation = "http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.3/metadata.xsd"
 	Publisher      = "G-Node"
 	Language       = "eng"
 	Version        = "1.0"
