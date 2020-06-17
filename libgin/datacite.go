@@ -31,26 +31,26 @@ var relIDTypeMap = map[string]string{
 // This is currently populated from the existing registered datasets.
 // A more comprehensive list may be added later.
 var funderIDMap = map[string]string{
-	"BMBF":                       "https://doi.org/10.13039/501100002347",
-	"Boehringer Ingelheim Fonds": "https://doi.org/10.13039/501100001645",
-	"CNRS":                       "https://doi.org/10.13039/501100004794",
-	"DAAD":                       "https://doi.org/10.13039/501100001655",
-	"DFG":                        "https://doi.org/10.13039/501100001659",
-	"Einstein Foundation Berlin": "https://doi.org/10.13039/501100006188",
-	"Einstein Stiftung":          "https://doi.org/10.13039/501100006188",
-	"EU":                         "https://doi.org/10.13039/100010664",
-	"European Union’s Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreements No. 720270 and No. 785907 (Human Brain Project SGA1 and SGA2; to M.M. and P.A.)": "https://doi.org/10.13039/100010661",
-	"European Union's Seventh Framework Programme (FP/2007-2013)": "https://doi.org/10.13039/100011102",
-	"Helmholtz Association":           "https://doi.org/10.13039/501100001656",
-	"Human Frontiers Science Program": "https://doi.org/10.13039/501100000854",
-	"Innovate UK":                     "https://dx.doi.org/10.13039/501100006041",
-	"Max Planck Society":              "https://doi.org/10.13039/501100004189",
+	"EU":                              "https://doi.org/10.13039/100010664",
+	"BMBF":                            "https://ror.org/04pz7b180",
+	"CNRS":                            "https://ror.org/02feahw73",
+	"DAAD":                            "https://ror.org/039djdh30",
+	"DFG":                             "https://ror.org/018mejw64",
+	"NIH":                             "https://ror.org/01cwqze88",
+	"NSF":                             "https://ror.org/00yjd3n13",
+	"Boehringer Ingelheim Fonds":      "https://ror.org/00dkye506",
+	"Einstein Foundation Berlin":      "https://ror.org/03s0fv852",
+	"Einstein Stiftung":               "https://ror.org/03s0fv852",
+	"Helmholtz Association":           "https://ror.org/0281dp749",
+	"Human Frontiers Science Program": "https://ror.org/02ebx7v45",
+	"Innovate UK":                     "https://ror.org/019wvm592",
+	"Max Planck Society":              "https://ror.org/01hhn8329",
+	"The JPB Foundation":              "https://ror.org/05nzwyq50",
+	"National Institute on Deafness and Other Communication Disorders":                                               "https://ror.org/04mhx6838",
+	"Seventh Framework Programme (European Union Seventh Framework Programme)":                                       "https://doi.org/10.13039/100011102",
+	"European Union's Seventh Framework Programme (FP/2007-2013)":                                                    "https://doi.org/10.13039/100011102",
 	"Ministry of Science, Research, and the Arts of the State of Baden-Württemberg (MWK), Juniorprofessor programme": "https://doi.org/10.13039/501100003542",
-	"National Institute on Deafness and Other Communication Disorders":                                               "https://doi.org/10.13039/100000055",
-	"NIH": "https://doi.org/10.13039/100000002",
-	"NSF": "https://doi.org/10.13039/100000001",
-	"Seventh Framework Programme (European Union Seventh Framework Programme)": "https://doi.org/10.13039/100011102",
-	"The JPB Foundation": "https://doi.org/10.13039/100007457",
+	"European Union’s Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreements No. 720270 and No. 785907 (Human Brain Project SGA1 and SGA2; to M.M. and P.A.)": "https://ror.org/00k4n6c32",
 }
 
 type Identifier struct {
@@ -236,7 +236,13 @@ func (dc *DataCite) AddFunding(fundstr string) {
 	}
 	fundref := FundingReference{Funder: funder, AwardNumber: awardNumber}
 	if id, known := funderIDMap[funder]; known {
-		fundref.Identifier = &FunderIdentifier{ID: id, Type: "Crossref Funder ID"}
+		idtype := ""
+		if strings.Contains(id, "ror.org") {
+			idtype = "ROR"
+		} else if strings.Contains(id, "doi.org") {
+			idtype = "Crossref Funder ID"
+		}
+		fundref.Identifier = &FunderIdentifier{ID: id, Type: idtype}
 	}
 	if dc.FundingReferences == nil {
 		dc.FundingReferences = &[]FundingReference{}
