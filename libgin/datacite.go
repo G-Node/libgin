@@ -142,7 +142,7 @@ type DataCite struct {
 	Language     string       `xml:"language"`
 	ResourceType ResourceType `xml:"resourceType"`
 	// Size of the archive
-	Size string `xml:"size,omitempty"`
+	Sizes []string `xml:"sizes>size,omitempty"`
 	// Version: 1.0
 	Version string `xml:"version"`
 }
@@ -341,7 +341,7 @@ func (dc *DataCite) AddURLs(repo, fork, archive string) {
 		relatedIdentifier := RelatedIdentifier{Identifier: archive, Type: "URL", RelationType: "IsVariantFormOf"}
 		dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
 		if size, err := GetArchiveSize(archive); err == nil {
-			dc.Size = fmt.Sprintf("%d bytes", size) // keep it in bytes so we can humanize it whenever we need to
+			dc.Sizes = []string{fmt.Sprintf("%d bytes", size)} // keep it in bytes so we can humanize it whenever we need to
 		}
 		// ignore error and don't add size
 	}
