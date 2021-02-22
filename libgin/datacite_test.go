@@ -281,8 +281,15 @@ func Test_MarshalUnmarshal(t *testing.T) {
 	example.AddAbstract("This is the abstract")
 	example.RightsList = []Rights{Rights{"CC-BY", "http://creativecommons.org/licenses/by/4.0/"}}
 	example.Subjects = &[]string{"One", "Two", "Three"}
+
+	// Test Funding name and award number
+	// Test default split character ";"
+	example.AddFunding("DFG; DFG.123; DFG.456, DFG.789")
+	example.AddFunding("EU; EU.123; EU.456, EU.789")
+	// Test backwards compatible split character ","
 	example.AddFunding("DFG, DFG.12345")
 	example.AddFunding("EU, EU.12345")
+
 	example.SetResourceType("Dataset")
 
 	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", RefType: "IsDescribedBy", Name: "Manuscript title for reference."})

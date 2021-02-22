@@ -223,17 +223,25 @@ func (dc *DataCite) SetResourceType(resourceType string) {
 }
 
 // AddFunding is a convenience function for appending a FundingReference in the
-// format of the YAML data (<FUNDER>, <AWARDNUMBER>).
+// format of the YAML data (<FUNDER>; <AWARDNUMBER>). Split character is semi-colon,
+// but for backwards compatibility reasons, comma is supported as a fallback split character
+// if no semi-colon is provided.
 func (dc *DataCite) AddFunding(fundstr string) {
-	funParts := strings.SplitN(fundstr, ",", 2)
+	splitchar := ";"
+	if !strings.Contains(fundstr, splitchar) {
+		splitchar = ","
+	}
+
+	funParts := strings.SplitN(fundstr, splitchar, 2)
 	var funder, awardNumber string
 	if len(funParts) == 2 {
 		funder = strings.TrimSpace(funParts[0])
 		awardNumber = strings.TrimSpace(funParts[1])
 	} else {
-		// No comma, add to award number as is
+		// No splitchar, add to award number as is
 		awardNumber = fundstr
 	}
+
 	fundref := FundingReference{Funder: funder, AwardNumber: awardNumber}
 	if id, known := funderIDMap[funder]; known {
 		idtype := ""
