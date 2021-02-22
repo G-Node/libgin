@@ -222,10 +222,10 @@ func (dc *DataCite) SetResourceType(resourceType string) {
 	dc.ResourceType = ResourceType{resourceType, resourceType}
 }
 
-// splitFunding is a convenience function to split funding information. 
-// Split character is semi-colon, but for backwards compatibility reasons, 
+// splitFunding is a convenience function to split funding information.
+// Split character is semi-colon, but for backwards compatibility reasons,
 // comma is supported as a fallback split character if no semi-colon is provided.
-func splitFunding(fundstr string) (string, string){
+func splitFunding(fundstr string) (string, string) {
 	splitchar := ";"
 	if !strings.Contains(fundstr, splitchar) {
 		splitchar = ","
