@@ -222,25 +222,31 @@ func (dc *DataCite) SetResourceType(resourceType string) {
 	dc.ResourceType = ResourceType{resourceType, resourceType}
 }
 
-// AddFunding is a convenience function for appending a FundingReference in the
-// format of the YAML data (<FUNDER>; <AWARDNUMBER>). Split character is semi-colon,
-// but for backwards compatibility reasons, comma is supported as a fallback split character
-// if no semi-colon is provided.
-func (dc *DataCite) AddFunding(fundstr string) {
+// splitFunding is a convenience function to split funding information. 
+// Split character is semi-colon, but for backwards compatibility reasons, 
+// comma is supported as a fallback split character if no semi-colon is provided.
+func splitFunding(fundstr string) (string, string){
 	splitchar := ";"
 	if !strings.Contains(fundstr, splitchar) {
 		splitchar = ","
 	}
 
 	funParts := strings.SplitN(fundstr, splitchar, 2)
-	var funder, awardNumber string
+	var fundername, awardnumber string
 	if len(funParts) == 2 {
-		funder = strings.TrimSpace(funParts[0])
-		awardNumber = strings.TrimSpace(funParts[1])
+		fundername = strings.TrimSpace(funParts[0])
+		awardnumber = strings.TrimSpace(funParts[1])
 	} else {
 		// No splitchar, add string to funderName as is
-		funder = fundstr
+		fundername = fundstr
 	}
+	return fundername, awardnumber
+}
+
+// AddFunding is a convenience function for appending a FundingReference in the
+// format of the YAML data (<FUNDER>; <AWARDNUMBER>).
+func (dc *DataCite) AddFunding(fundstr string) {
+	funder, awardNumber := splitFunding(fundstr)
 
 	fundref := FundingReference{Funder: funder, AwardNumber: awardNumber}
 	if id, known := funderIDMap[funder]; known {

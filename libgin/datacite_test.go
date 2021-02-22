@@ -13,6 +13,53 @@ import (
 	"time"
 )
 
+func Test_splitFunding(t *testing.T) {
+	subname := "funder name"
+	subnum := "award number"
+
+	// Test normal split on semi-colon
+	instr := fmt.Sprintf("%s; %s", subname, subnum)
+	outname, outnum := splitFunding(instr)
+	if outname != subname {
+		t.Fatalf("Fundername 'normal' parse error: (in) '%s' (out) '%s' (expect) '%s'", instr, outname, subname)
+	}
+	if outnum != subnum {
+		t.Fatalf("AwardNumber 'normal' parse error: (in) '%s' (out) '%s' (expect) '%s'", instr, outnum, subnum)
+	}
+
+	// Test fallback comma split on missing semi-colon
+	instr = fmt.Sprintf("%s, %s", subname, subnum)
+	outname, outnum = splitFunding(instr)
+	if outname != subname {
+		t.Fatalf("Fundername 'fallback' parse error: (in) '%s' (out) '%s' (expect) '%s'", instr, outname, subname)
+	}
+	if outnum != subnum {
+		t.Fatalf("AwardNumber 'normal' parse error: (in) '%s' (out) '%s' (expect) '%s'", instr, outnum, subnum)
+	}
+
+	// Test non split return
+	instr = fmt.Sprintf("%s%s", subname, subnum)
+	outname, outnum = splitFunding(instr)
+	if outname != instr {
+		t.Fatalf("Fundername 'no-split' parse error: (in) '%s' (out) '%s' (expect) '%s'", instr, outname, instr)
+	}
+	if outnum != "" {
+		t.Fatalf("AwardNumber 'no-split' parse error: (in) '%s' (out) '%s' (expect) ''", instr, outnum)
+	}
+
+	// Test no issue on empty string
+	outname, outnum = splitFunding(instr)
+
+	// Test proper split on comma with semi-colon and surrounding whitespaces
+	subnameissue := " funder, name "
+	subnameclean := "funder, name"
+	instr = fmt.Sprintf("%s;%s", subnameissue, subnum)
+	outname, outnum = splitFunding(instr)
+	if outname != subnameclean {
+		t.Fatalf("Fundername 'issues' parse error: (in) '%s' (out) '%s' (expect) '%s'", instr, outname, subnameclean)
+	}
+}
+
 func Test_DataCiteMarshal(t *testing.T) {
 	example := NewDataCite()
 	example.Creators = []Creator{
