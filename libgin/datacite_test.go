@@ -289,6 +289,8 @@ func Test_MarshalUnmarshal(t *testing.T) {
 	// Test backwards compatible split character ","
 	example.AddFunding("DFG, DFG.12345")
 	example.AddFunding("EU, EU.12345")
+	// Test funding without split character added to funderName
+	example.AddFunding("Helmholtz Association")
 
 	example.SetResourceType("Dataset")
 

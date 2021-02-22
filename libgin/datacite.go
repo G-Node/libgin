@@ -238,8 +238,8 @@ func (dc *DataCite) AddFunding(fundstr string) {
 		funder = strings.TrimSpace(funParts[0])
 		awardNumber = strings.TrimSpace(funParts[1])
 	} else {
-		// No splitchar, add to award number as is
-		awardNumber = fundstr
+		// No splitchar, add string to funderName as is
+		funder = fundstr
 	}
 
 	fundref := FundingReference{Funder: funder, AwardNumber: awardNumber}
