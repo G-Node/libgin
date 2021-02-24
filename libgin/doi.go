@@ -171,7 +171,7 @@ func (c *Author) GetValidID() *NamedIdentifier {
 }
 func (a *Author) RenderAuthor() string {
 	auth := fmt.Sprintf("%s,%s;%s;%s", a.LastName, a.FirstName, a.Affiliation, a.ID)
-	return strings.TrimRight(auth, ";")
+	return strings.Replace(strings.TrimRight(auth, ";"), ";;", ";", -1)
 }
 
 type NamedIdentifier struct {
