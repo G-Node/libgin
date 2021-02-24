@@ -328,7 +328,7 @@ func TestMakeZip(t *testing.T) {
 	zipbasename := "test_makezip.zip"
 	zipfilename := filepath.Join(targetpath, zipbasename)
 
-	// Checks that files in directories ".git" and ".excluded" are excluded and 
+	// Checks that files in directories ".git" and ".excluded" are excluded and
 	// file "not_excluded" is still added.
 	exclude := []string{".git", ".excluded", "not_excluded.md"}
 
@@ -343,23 +343,23 @@ func TestMakeZip(t *testing.T) {
 		if err != nil {
 			return fmt.Errorf("Failed to get abs path for target zip file in function '%s': %v", fn, err)
 		}
-	
+
 		zipfp, err := os.Create(zipfilename)
 		if err != nil {
 			return fmt.Errorf("Failed to create zip file for writing in function '%s': %v", fn, err)
 		}
 		defer zipfp.Close()
-	
+
 		origdir, err := os.Getwd()
 		if err != nil {
 			return fmt.Errorf("Failed to get working directory in function '%s': %v", fn, err)
 		}
 		defer os.Chdir(origdir)
-	
+
 		if err := os.Chdir(source); err != nil {
 			return fmt.Errorf("Failed to change to source directory to make zip file in function '%s': %v", fn, err)
 		}
-	
+
 		if err := MakeZip(zipfp, exclude, "."); err != nil {
 			return fmt.Errorf("Failed to change to source directory to make zip file in function '%s': %v", fn, err)
 		}
@@ -371,14 +371,14 @@ func TestMakeZip(t *testing.T) {
 	}
 
 	// Files included in the zip file
-	incl := map[string]struct{} {
-		"included/included.md": {},
+	incl := map[string]struct{}{
+		"included/included.md":     {},
 		"included/not_excluded.md": {},
-		"included.md": {},
+		"included.md":              {},
 	}
 	// Files excluded from the zip file
-	excl := map[string]struct{} {
-		".git/excluded.md": {},
+	excl := map[string]struct{}{
+		".git/excluded.md":     {},
 		"excluded/excluded.md": {},
 	}
 
