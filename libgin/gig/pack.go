@@ -281,8 +281,8 @@ func OpenPackFile(path string) (*PackFile, error) {
 	}
 
 	fd := &PackFile{File: osfd,
-		Version:          header.Version,
-		ObjCount:         header.Objects}
+		Version:  header.Version,
+		ObjCount: header.Objects}
 
 	return fd, nil
 }

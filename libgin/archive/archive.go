@@ -19,10 +19,11 @@ type Writer interface {
 
 // MakeZip recursively writes all the files found under the provided sources to
 // the dest io.Writer in ZIP format.  Any directories listed in source are
-// archived recursively.  Empty directories are ignored.
-func MakeZip(dest io.Writer, source ...string) error {
-	// NOTE: Old function that clones and zips repositories.
-	//       Does not support commits other than master
+// archived recursively.  Empty directories and directories and files specified
+// via the exclude parameter are ignored.
+func MakeZip(dest io.Writer, exclude []string, source ...string) error {
+	// NOTE: Used in the gin-doi library.
+	//       Does not support commits other than master.
 
 	// check sources
 	for _, src := range source {
@@ -39,6 +40,14 @@ func MakeZip(dest io.Writer, source ...string) error {
 		// return on any error
 		if err != nil {
 			return err
+		}
+
+		// return with specific SkipDir error when encountering an excluded directory or file;
+		// if it is a direcory, the directory content will be excluded as well.
+		for i := range exclude {
+			if exclude[i] == path {
+				return filepath.SkipDir
+			}
 		}
 
 		// create a new dir/file header

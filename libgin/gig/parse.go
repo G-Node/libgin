@@ -32,7 +32,7 @@ func parseSignature(line string) (Signature, error) {
 	if end == -1 {
 		return u, fmt.Errorf("invalid signature format")
 	}
-	u.Email = line[start+2: end]
+	u.Email = line[start+2 : end]
 
 	//<unix timestamp>
 	tstr, off := split2(line[end+2:], " ")

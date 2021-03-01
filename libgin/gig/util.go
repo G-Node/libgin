@@ -1,10 +1,10 @@
 package gig
 
 import (
-	"io"
 	"bytes"
-	"strings"
 	"compress/zlib"
+	"io"
+	"strings"
 )
 
 func readUntilNul(r io.Reader) (string, error) {
@@ -33,8 +33,8 @@ func split2(s, sep string) (head, tail string) {
 }
 
 type zlibReadCloser struct {
-	io.LimitedReader     //R of io.LimitedReader is the zlib reader
-	source io.ReadCloser //the underlying source
+	io.LimitedReader               //R of io.LimitedReader is the zlib reader
+	source           io.ReadCloser //the underlying source
 }
 
 func (r *zlibReadCloser) Close() error {
