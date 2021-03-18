@@ -267,25 +267,28 @@ func (dc *DataCite) AddFunding(fundstr string) {
 
 // AddReference is a convenience function for appending a RelatedIdentifier
 // that describes a referenced work. The RelatedIdentifier includes the
-// identifier, relation type, and identifier type. A full citation string is
-// also added to the Descriptions list.
+// identifier, relation type, and identifier type.
+// The RelatedIdentifier is not appended, if either identifier or relation type
+// cannot be identified.
+// A full citation string is also added to the Descriptions list.
 func (dc *DataCite) AddReference(ref *Reference) {
 	// Add info as RelatedIdentifier
 	refIDParts := strings.SplitN(ref.ID, ":", 2)
 	var relIDType, relID string
+	// Only add a related identifier, if the type and id can be separated and exist
+
 	if len(refIDParts) == 2 {
 		relIDType = strings.TrimSpace(refIDParts[0])
 		if ridt, ok := relIDTypeMap[strings.ToLower(relIDType)]; ok {
 			relIDType = ridt
 		}
 		relID = strings.TrimSpace(refIDParts[1])
-	} else {
-		// No colon, add to ID as is
-		relID = ref.ID
-	}
 
-	relatedIdentifier := RelatedIdentifier{Identifier: relID, Type: relIDType, RelationType: ref.RefType}
-	dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+		if relID != "" && relIDType != "" {
+			relatedIdentifier := RelatedIdentifier{Identifier: relID, Type: relIDType, RelationType: ref.RefType}
+			dc.RelatedIdentifiers = append(dc.RelatedIdentifiers, relatedIdentifier)
+		}
+	}
 
 	// Add citation string as Description
 	var namecitation string

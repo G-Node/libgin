@@ -79,6 +79,8 @@ func Test_DataCiteMarshal(t *testing.T) {
 	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", RefType: "IsDescribedBy", Name: "Manuscript title for reference."})
 	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", RefType: "IsSupplementTo", Name: "Some other work"})
 	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", RefType: "IsReferencedBy", Name: "A work that references this dataset."})
+	example.AddReference(&Reference{ID: "10.3333/example.doi", RefType: "IsReferencedBy", Name: "A reference without the reqired type - should not be added"})
+	example.AddReference(&Reference{ID: "doi:", RefType: "IsReferencedBy", Name: "A reference without the reqired id - should not be added"})
 
 	_, err := xml.MarshalIndent(example, "", "\t")
 	if err != nil {
