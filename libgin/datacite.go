@@ -167,10 +167,11 @@ func NewDataCite() DataCite {
 }
 
 func parseAuthorID(authorID string) *NameIdentifier {
-	if authorID == "" {
+	lowerID := strings.ToLower(authorID)
+	if lowerID == "" || lowerID == "orcid:" || lowerID == "researcherid:" {
 		return nil
 	}
-	lowerID := strings.ToLower(authorID)
+
 	if strings.HasPrefix(lowerID, "orcid") {
 		// four blocks of four numbers separated by dash; last character can be X
 		// https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier

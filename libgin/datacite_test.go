@@ -157,6 +157,14 @@ func Test_parseAuthorID(t *testing.T) {
 		t.Fatal("Empty author ID should return nil")
 	}
 
+	if ident := parseAuthorID("orcID:"); ident != nil {
+		t.Fatal("Stunted AuthorID 'orcID:' should return nil")
+	}
+
+	if ident := parseAuthorID("researcherID:"); ident != nil {
+		t.Fatal("Stunted AuthorID 'researcherID:' should return nil")
+	}
+
 	validORCIDs := []string{
 		// valid, all 0s (different delimiters)
 		"orcid.0000-0000-0000-0000",
