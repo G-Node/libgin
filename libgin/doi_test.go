@@ -39,7 +39,7 @@ func TestAuthor(t *testing.T) {
 
 	// Test RenderAuthor; make all expected combinations explicit
 	// No omit test
-	validate = fmt.Sprintf("%s,%s;%s;%s", lname, fname, aff, id)
+	validate = fmt.Sprintf("%s, %s; %s; %s", lname, fname, aff, id)
 
 	auth = Author{
 		FirstName:   fname,
@@ -50,7 +50,7 @@ func TestAuthor(t *testing.T) {
 	check("No omit")
 
 	// Omit ID test
-	validate = fmt.Sprintf("%s,%s;%s", lname, fname, aff)
+	validate = fmt.Sprintf("%s, %s; %s", lname, fname, aff)
 
 	auth = Author{
 		FirstName:   fname,
@@ -60,7 +60,7 @@ func TestAuthor(t *testing.T) {
 	check("Omit ID")
 
 	// Omit affiliation test
-	validate = fmt.Sprintf("%s,%s;%s", lname, fname, id)
+	validate = fmt.Sprintf("%s, %s; %s", lname, fname, id)
 
 	auth = Author{
 		FirstName: fname,
@@ -70,7 +70,7 @@ func TestAuthor(t *testing.T) {
 	check("Omit affiliation")
 
 	// Omit ID and affiliation test
-	validate = fmt.Sprintf("%s,%s", lname, fname)
+	validate = fmt.Sprintf("%s, %s", lname, fname)
 
 	auth = Author{
 		FirstName: fname,

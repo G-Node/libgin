@@ -169,9 +169,13 @@ func (c *Author) GetValidID() *NamedIdentifier {
 	}
 	return nil
 }
+
+// RenderAuthor returns a string of the Author content in the format
+// 'Lastname, Firstname; Affiliation; ID'. Empty entries are omitted.
 func (a *Author) RenderAuthor() string {
-	auth := fmt.Sprintf("%s,%s;%s;%s", a.LastName, a.FirstName, a.Affiliation, a.ID)
-	return strings.Replace(strings.TrimRight(auth, ";"), ";;", ";", -1)
+	auth := fmt.Sprintf("%s, %s; %s; %s", a.LastName, a.FirstName, a.Affiliation, a.ID)
+
+	return strings.Replace(strings.TrimRight(auth, "; "), "; ;", ";", -1)
 }
 
 type NamedIdentifier struct {
