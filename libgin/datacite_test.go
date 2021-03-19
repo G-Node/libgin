@@ -311,21 +311,6 @@ func Test_parseAuthorID(t *testing.T) {
 
 }
 
-func Test_GetArchiveSize(t *testing.T) {
-	// URL is earliest archive with the new name format, so wont change.
-	// Older archives might be renamed to the new format soon.
-	const archiveURL = "https://doi.gin.g-node.org/10.12751/g-node.4bdb22/10.12751_g-node.4bdb22.zip"
-	const expSize = 1559190240
-	size, err := GetArchiveSize(archiveURL)
-	if err != nil {
-		t.Fatalf("Failed to retrieve archive size for %q: %v", archiveURL, err.Error())
-	}
-
-	if size != expSize {
-		t.Fatalf("Incorrect archive size: %d (expected) != %d", expSize, size)
-	}
-}
-
 func Test_MarshalUnmarshal(t *testing.T) {
 	example := NewDataCite()
 	example.Creators = []Creator{
