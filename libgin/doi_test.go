@@ -94,3 +94,19 @@ func TestAuthor(t *testing.T) {
 	}
 	check("Omit ID/affiliation")
 }
+
+func TestIsRegisteredDOI(t *testing.T) {
+	invalid := "idonotexist"
+	valid := "10.12751/g-node.5b08du"
+
+	// check false on non-existing DOI
+	ok := IsRegisteredDOI(invalid)
+	if ok {
+		t.Fatal("Expected check to fail on invalid DOI")
+	}
+
+	ok = IsRegisteredDOI(valid)
+	if !ok {
+		t.Fatal("Expected check to succeed on valid DOI")
+	}
+}
