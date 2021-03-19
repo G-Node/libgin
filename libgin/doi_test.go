@@ -2,6 +2,7 @@ package libgin
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -93,6 +94,65 @@ func TestAuthor(t *testing.T) {
 		LastName:  lname,
 	}
 	check("Omit ID/affiliation")
+}
+
+func TestGetURL(t *testing.T) {
+	// check empty or malformed ID
+	var ref = Reference{}
+
+	checkstr := ref.GetURL()
+	if checkstr != "" {
+		t.Fatalf("Expected empty URL on empty ID but got %q", checkstr)
+	}
+	ref.ID = "IamNotOK"
+	checkstr = ref.GetURL()
+	if checkstr != "" {
+		t.Fatalf("Expected empty URL on invalid ID but got %q", checkstr)
+	}
+
+	// check empty on empty or unknown prefix
+	ref.ID = ":value"
+	checkstr = ref.GetURL()
+	if checkstr != "" {
+		t.Fatalf("Expected empty URL on missing prefix but got %q", checkstr)
+	}
+	ref.ID = "you:dontKnowMe"
+	checkstr = ref.GetURL()
+	if checkstr != "" {
+		t.Fatalf("Expected empty URL on unknown ID prefix but got %q", checkstr)
+	}
+
+	// check url prefix behavior
+	idval := "reference"
+	ref.ID = fmt.Sprintf("uRl:%s", idval)
+	checkstr = ref.GetURL()
+	if checkstr != idval {
+		t.Fatalf("Expected %q on URL prefix but got %q", idval, checkstr)
+	}
+
+	// check doi prefix behavior
+	ref.ID = fmt.Sprintf("DOI:%s", idval)
+	resstr := fmt.Sprintf("doi.org/%s", idval)
+	checkstr = ref.GetURL()
+	if !strings.Contains(checkstr, resstr) {
+		t.Fatalf("Got unexpected DOI URL string %q", checkstr)
+	}
+
+	// check arxiv prefix behavior
+	ref.ID = fmt.Sprintf("arXiv:%s", idval)
+	checkstr = ref.GetURL()
+	resstr = fmt.Sprintf("arxiv.org/abs/%s", idval)
+	if !strings.Contains(checkstr, resstr) {
+		t.Fatalf("Got unexpected arxiv URL string %q", checkstr)
+	}
+
+	// check pmid prefix behavior
+	ref.ID = fmt.Sprintf("pmID:%s", idval)
+	checkstr = ref.GetURL()
+	resstr = fmt.Sprintf("www.ncbi.nlm.nih.gov/pubmed/%s", idval)
+	if !strings.Contains(checkstr, resstr) {
+		t.Fatalf("Got unexpected pmid URL string %q", checkstr)
+	}
 }
 
 func TestIsRegisteredDOI(t *testing.T) {
