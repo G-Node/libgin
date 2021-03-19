@@ -22,6 +22,22 @@ func TestRepoPathToUUID(t *testing.T) {
 	}
 }
 
+func TestGetType(t *testing.T) {
+	var res = DOIRegInfo{}
+
+	check := res.GetType()
+	if check != "Dataset" {
+		t.Fatalf("Expected 'Dataset' but got %q", check)
+	}
+
+	val := "Datapaper"
+	res.ResourceType = val
+	check = res.GetType()
+	if check != val {
+		t.Fatalf("Expected %q but got %q", val, check)
+	}
+}
+
 func TestAuthor(t *testing.T) {
 	lname := "ln"
 	fname := "fn"
