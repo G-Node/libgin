@@ -30,14 +30,14 @@ func ReadConf(key string) string {
 func GetArchiveSize(archiveURL string) (uint64, error) {
 	resp, err := http.Get(archiveURL)
 	if err != nil {
-		return 0, fmt.Errorf("Request for archive %q failed: %s\n", archiveURL, err.Error())
+		return 0, fmt.Errorf("request for archive %q failed: %s", archiveURL, err.Error())
 	}
 	if resp.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("Request for archive %q failed: %s\n", archiveURL, resp.Status)
+		return 0, fmt.Errorf("request for archive %q failed: %s", archiveURL, resp.Status)
 	}
 	if resp.ContentLength < 0 {
 		// returns -1 when size is unknown; let's turn it into an error
-		return 0, fmt.Errorf("Unable to determine size of %q", archiveURL)
+		return 0, fmt.Errorf("unable to determine size of %q", archiveURL)
 	}
 	return uint64(resp.ContentLength), nil
 }

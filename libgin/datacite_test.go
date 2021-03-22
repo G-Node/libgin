@@ -79,6 +79,8 @@ func Test_DataCiteMarshal(t *testing.T) {
 	example.AddReference(&Reference{ID: "doi:10.1111/example.doi", RefType: "IsDescribedBy", Name: "Manuscript title for reference."})
 	example.AddReference(&Reference{ID: "arxiv:10.2222/example.doi", RefType: "IsSupplementTo", Name: "Some other work"})
 	example.AddReference(&Reference{ID: "doi:10.3333/example.doi", RefType: "IsReferencedBy", Name: "A work that references this dataset."})
+	example.AddReference(&Reference{ID: "10.3333/example.doi", RefType: "IsReferencedBy", Name: "A reference without the reqired type - should not be added"})
+	example.AddReference(&Reference{ID: "doi:", RefType: "IsReferencedBy", Name: "A reference without the reqired id - should not be added"})
 
 	_, err := xml.MarshalIndent(example, "", "\t")
 	if err != nil {
@@ -155,6 +157,14 @@ func Test_parseAuthorID(t *testing.T) {
 
 	if ident := parseAuthorID(""); ident != nil {
 		t.Fatal("Empty author ID should return nil")
+	}
+
+	if ident := parseAuthorID("orcID:"); ident != nil {
+		t.Fatal("Stunted AuthorID 'orcID:' should return nil")
+	}
+
+	if ident := parseAuthorID("researcherID:"); ident != nil {
+		t.Fatal("Stunted AuthorID 'researcherID:' should return nil")
 	}
 
 	validORCIDs := []string{
@@ -299,21 +309,6 @@ func Test_parseAuthorID(t *testing.T) {
 		}
 	}
 
-}
-
-func Test_GetArchiveSize(t *testing.T) {
-	// URL is earliest archive with the new name format, so wont change.
-	// Older archives might be renamed to the new format soon.
-	const archiveURL = "https://doi.gin.g-node.org/10.12751/g-node.4bdb22/10.12751_g-node.4bdb22.zip"
-	const expSize = 1559190240
-	size, err := GetArchiveSize(archiveURL)
-	if err != nil {
-		t.Fatalf("Failed to retrieve archive size for %q: %v", archiveURL, err.Error())
-	}
-
-	if size != expSize {
-		t.Fatalf("Incorrect archive size: %d (expected) != %d", expSize, size)
-	}
 }
 
 func Test_MarshalUnmarshal(t *testing.T) {

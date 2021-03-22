@@ -14,6 +14,7 @@ import (
 // RepositoryYAML is used to read the information provided by a GIN user
 // through the datacite.yml file. This data is usually used to populate the
 // DataCite and RepositoryMetadata types.
+// This struct is used in the G-Node gin-doi project.
 type RepositoryYAML struct {
 	Authors         []Author    `yaml:"authors"`
 	Title           string      `yaml:"title"`
@@ -26,6 +27,8 @@ type RepositoryYAML struct {
 	ResourceType    string      `yaml:"resourcetype"`
 }
 
+// Author holds information about a DOI Author.
+// This struct is used in the G-Node gin-doi project.
 type Author struct {
 	FirstName   string `yaml:"firstname"`
 	LastName    string `yaml:"lastname"`
@@ -33,11 +36,16 @@ type Author struct {
 	ID          string `yaml:"id,omitempty"`
 }
 
+// License holds information about a DOI license.
+// The struct is used in the G-Node gogs and gin-doi projects.
 type License struct {
 	Name string `yaml:"name"`
 	URL  string `yaml:"url"`
 }
 
+// Reference holds information about a DOI reference.
+// The "Name" field has been deprecated.
+// This struct is used in the G-Node gin-doi project.
 type Reference struct {
 	ID       string `yaml:"id,omitempty"`
 	RefType  string `yaml:"reftype,omitempty"`
@@ -45,6 +53,8 @@ type Reference struct {
 	Citation string `yaml:"citation,omitempty"` // meant to replace Name
 }
 
+// GINUser holds basic information about a user on GIN.
+// This struct is used in the G-Node gin-doi project.
 type GINUser struct {
 	Username string
 	Email    string
@@ -52,7 +62,8 @@ type GINUser struct {
 }
 
 // RepositoryMetadata can contain all known metadata for a registered (or
-// to-be-registered) repository. To do this, it embeds the
+// to-be-registered) repository.
+// This struct is used in the G-Node gin-doi project.
 type RepositoryMetadata struct {
 	// YAMLData is the original data coming from the repository
 	YAMLData *RepositoryYAML
@@ -78,6 +89,7 @@ type RepositoryMetadata struct {
 // This map is required because the current method of computing UUIDs differs
 // from the older method and this lookup is used to handle the old-method
 // UUIDs.
+// This map is used in the G-Node gin-doi project.
 var UUIDMap = map[string]string{
 	"INT/multielectrode_grasp":                   "f83565d148510fede8a277f660e1a419",
 	"ajkumaraswamy/HB-PAC_disinhibitory_network": "1090f803258557299d287c4d44a541b2",
@@ -87,6 +99,7 @@ var UUIDMap = map[string]string{
 }
 
 // RepoPathToUUID computes a UUID from a repository path.
+// This function is used in the G-Node gogs project.
 func RepoPathToUUID(URI string) string {
 	if doi, ok := UUIDMap[URI]; ok {
 		return doi
@@ -97,6 +110,7 @@ func RepoPathToUUID(URI string) string {
 
 // DOIRequestData is used to transmit data from GIN to DOI when a registration
 // request is triggered.
+// This struct is used in the G-Node gogs and gin-doi projects.
 type DOIRequestData struct {
 	Username   string
 	Realname   string
@@ -105,7 +119,8 @@ type DOIRequestData struct {
 }
 
 // DOIRegInfo holds all the metadata and information necessary for a DOI registration request.
-// Deprecated and obsolete: Marked for removal
+// Deprecated: Marked for removal
+// This struct is used in the G-Node gogs project.
 type DOIRegInfo struct {
 	Missing         []string
 	DOI             string
@@ -124,6 +139,9 @@ type DOIRegInfo struct {
 	TemplateVersion string
 }
 
+// GetType returns the ResourceType entry of a DOIRegInfo
+// or the string "Dataset" if no ResourceType entry was found.
+// This method is currently used in the G-Node gogs project.
 func (c *DOIRegInfo) GetType() string {
 	if c.ResourceType != "" {
 		return c.ResourceType
@@ -131,6 +149,10 @@ func (c *DOIRegInfo) GetType() string {
 	return "Dataset"
 }
 
+// GetCitation returns a formatted string of a DOIRegInfo content
+// containing Authors, Year, Title and DOI link.
+// This method is currently not used in any project and should be
+// considered deprecated.
 func (c *DOIRegInfo) GetCitation() string {
 	var authors string
 	for _, auth := range c.Authors {
@@ -143,18 +165,28 @@ func (c *DOIRegInfo) GetCitation() string {
 	return fmt.Sprintf("%s (%s) %s. G-Node. https://doi.org/%s", authors, c.Year(), c.Title, c.DOI)
 }
 
+// Year is used in the unused GetCitation DOIRefInfo method
+// and should be considered deprecated.
 func (c *DOIRegInfo) Year() string {
 	return fmt.Sprintf("%d", c.DateTime.Year())
 }
 
+// ISODate is currently not used in any project and should be
+// considered deprecated.
 func (c *DOIRegInfo) ISODate() string {
 	return c.DateTime.Format("2006-01-02")
 }
 
+// PrettyDate is currently not used in any project and should be
+// considered deprecated.
 func PrettyDate(dt *time.Time) string {
 	return dt.Format("02 Jan. 2006")
 }
 
+// GetValidID returns a NamedIdentifier struct for an Author, if
+// the Author.ID contains a valid ORCID entry.
+// The Method is currently not used in any project and should be
+// considered deprecated.
 func (c *Author) GetValidID() *NamedIdentifier {
 	if c.ID == "" {
 		return nil
@@ -169,17 +201,30 @@ func (c *Author) GetValidID() *NamedIdentifier {
 	}
 	return nil
 }
+
+// RenderAuthor returns a string of the Author content in the format
+// 'Lastname, Firstname; Affiliation; ID'. Empty entries are omitted.
+// This method is used in the G-Node gogs project.
 func (a *Author) RenderAuthor() string {
-	auth := fmt.Sprintf("%s,%s;%s;%s", a.LastName, a.FirstName, a.Affiliation, a.ID)
-	return strings.Replace(strings.TrimRight(auth, ";"), ";;", ";", -1)
+	auth := fmt.Sprintf("%s, %s; %s; %s", a.LastName, a.FirstName, a.Affiliation, a.ID)
+
+	return strings.Replace(strings.TrimRight(auth, "; "), "; ;", ";", -1)
 }
 
+// NamedIdentifier is used in the unused GetValidID Author method
+// and should be considered deprecated.
 type NamedIdentifier struct {
 	SchemeURI string
 	Scheme    string
 	ID        string
 }
 
+// GetURL splits the ID string of a Reference at the ":" char
+// into prefix and value and returns a full URL dependent on
+// the provided prefix. Supported prefixes are "doi", "archiv",
+// "pmid" and "url". If no prefix can be identified, an empty
+// string is returned.
+// This method is used in the G-Node gin-doi project.
 func (ref Reference) GetURL() string {
 	idparts := strings.SplitN(ref.ID, ":", 2)
 	if len(idparts) != 2 {
@@ -210,6 +255,10 @@ func (ref Reference) GetURL() string {
 	return fmt.Sprintf("%s%s", prefix, idnum)
 }
 
+// IsRegisteredDOI tries to http.Get a DOI via a provided
+// DOI ID and returns a boolean value accoring to success
+// or failure.
+// This Function is used in the G-Node gin-doi and gogs projects.
 func IsRegisteredDOI(doi string) bool {
 	url := fmt.Sprintf("https://doi.org/%s", doi)
 	resp, err := http.Get(url)
